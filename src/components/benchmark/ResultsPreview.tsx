@@ -1,9 +1,11 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { BenchmarkResult, getMaturityLabel, getRecommendedCTA } from "@/lib/scoring";
 import { ScoreGauge } from "./ScoreGauge";
 import { MarketPosition } from "./MarketPosition";
 import { BadgeDisplay } from "./BadgeDisplay";
-import { Lock, ArrowRight, TrendingUp, AlertTriangle } from "lucide-react";
+import { WorkshopModal } from "./WorkshopModal";
+import { Lock, ArrowRight, TrendingUp, AlertTriangle, Calendar, MessageSquare } from "lucide-react";
 
 interface ResultsPreviewProps {
   result: BenchmarkResult;
@@ -14,6 +16,7 @@ interface ResultsPreviewProps {
 
 export function ResultsPreview({ result, industry, industryLabel, onUnlock }: ResultsPreviewProps) {
   const cta = getRecommendedCTA(result.maturityLevel);
+  const [workshopOpen, setWorkshopOpen] = useState(false);
 
   return (
     <div className="animate-fade-up">
@@ -83,6 +86,40 @@ export function ResultsPreview({ result, industry, industryLabel, onUnlock }: Re
         </div>
       </div>
 
+      {/* Workshop CTA - positioned strategically based on maturity */}
+      <div 
+        onClick={() => setWorkshopOpen(true)}
+        className="glass rounded-2xl p-6 mb-10 cursor-pointer card-interactive border-accent/20"
+      >
+        <div className="flex items-start gap-4">
+          <div className="w-12 h-12 rounded-xl bg-accent/20 flex items-center justify-center flex-shrink-0">
+            <MessageSquare className="w-6 h-6 text-accent" />
+          </div>
+          <div className="flex-1">
+            <h3 className="font-display font-semibold text-foreground mb-1">
+              {result.maturityLevel <= 2 
+                ? "Clarifier vos priorités avec un expert"
+                : result.maturityLevel <= 3
+                ? "Valider votre positionnement"
+                : "Accélérer vers le niveau supérieur"
+              }
+            </h3>
+            <p className="text-sm text-muted-foreground mb-3">
+              {result.maturityLevel <= 2 
+                ? "Un workshop de 90 minutes pour identifier vos quick wins et structurer votre roadmap data."
+                : result.maturityLevel <= 3
+                ? "Challenger vos résultats et définir les actions prioritaires pour progresser."
+                : "Échangez avec nos experts pour transformer votre avance en avantage compétitif durable."
+              }
+            </p>
+            <Button variant="outline" size="sm" className="pointer-events-none">
+              <Calendar className="w-4 h-4 mr-2" />
+              Réserver un créneau
+            </Button>
+          </div>
+        </div>
+      </div>
+
       {/* Locked content teaser */}
       <div className="relative glass rounded-2xl p-6 mb-10 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-card/95" />
@@ -132,15 +169,24 @@ export function ResultsPreview({ result, industry, industryLabel, onUnlock }: Re
           </Button>
           <Button
             variant="outline"
+            onClick={() => setWorkshopOpen(true)}
             className="border-border hover:bg-muted"
           >
-            {cta.action}
+            <Calendar className="w-4 h-4 mr-2" />
+            Workshop exécutif
           </Button>
         </div>
         <p className="text-xs text-muted-foreground mt-4">
           Paiement sécurisé • Accès immédiat
         </p>
       </div>
+
+      <WorkshopModal 
+        open={workshopOpen} 
+        onOpenChange={setWorkshopOpen} 
+        context="results"
+        maturityLevel={result.maturityLevel}
+      />
     </div>
   );
 }
