@@ -9,6 +9,7 @@ import { ResultsPreview } from "@/components/benchmark/ResultsPreview";
 import { domains, industries } from "@/data/questions";
 import { calculateScores, Answer, BenchmarkResult } from "@/lib/scoring";
 import { BarChart3 } from "lucide-react";
+import { toast } from "sonner";
 
 type Step = "capture" | "onboarding" | "questions" | "results";
 
@@ -88,8 +89,9 @@ export default function Benchmark() {
   }, [userData.industry]);
 
   const handleUnlock = () => {
-    // In production, this would open Stripe checkout
-    alert("Stripe integration will be enabled here for payment processing.");
+    toast.info("Accès premium bientôt disponible", {
+      description: "Nous vous contacterons lorsque l'accès complet sera disponible.",
+    });
   };
 
   return (
