@@ -1,11 +1,16 @@
+import { useState } from "react";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, BarChart3, Target, Zap, Building2 } from "lucide-react";
+import { ArrowRight, BarChart3, Target, Zap, Building2, BookOpen, Calendar } from "lucide-react";
+import { WorkshopModal } from "./WorkshopModal";
 
 interface LandingHeroProps {
   onStart: () => void;
 }
 
 export function LandingHero({ onStart }: LandingHeroProps) {
+  const [workshopOpen, setWorkshopOpen] = useState(false);
+
   return (
     <div className="relative min-h-screen flex flex-col">
       {/* Background glow effect */}
@@ -24,12 +29,27 @@ export function LandingHero({ onStart }: LandingHeroProps) {
               DataPulse
             </span>
           </div>
-          <Button 
-            variant="ghost" 
-            className="text-muted-foreground hover:text-foreground"
-          >
-            En savoir plus
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button 
+              variant="ghost" 
+              className="text-muted-foreground hover:text-foreground hidden sm:flex"
+              asChild
+            >
+              <Link to="/methodologie">
+                <BookOpen className="w-4 h-4 mr-2" />
+                Notre modèle
+              </Link>
+            </Button>
+            <Button 
+              variant="outline"
+              size="sm"
+              onClick={() => setWorkshopOpen(true)}
+              className="hidden md:flex"
+            >
+              <Calendar className="w-4 h-4 mr-2" />
+              Workshop
+            </Button>
+          </div>
         </div>
       </header>
 
@@ -56,18 +76,40 @@ export function LandingHero({ onStart }: LandingHeroProps) {
               et les actions prioritaires pour accélérer.
             </p>
 
-            {/* CTA */}
-            <div className="flex flex-col sm:flex-row items-start gap-4 animate-fade-up delay-300">
-              <Button
-                onClick={onStart}
-                className="btn-primary text-primary-foreground font-semibold px-8 py-7 text-lg"
-              >
-                Démarrer le benchmark gratuit
-                <ArrowRight className="ml-2 w-5 h-5" />
-              </Button>
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <span className="w-2 h-2 rounded-full bg-success animate-pulse" />
-                2,847 dirigeants évalués ce mois
+            {/* CTAs */}
+            <div className="flex flex-col gap-4 animate-fade-up delay-300">
+              <div className="flex flex-col sm:flex-row items-start gap-4">
+                <Button
+                  onClick={onStart}
+                  className="btn-primary text-primary-foreground font-semibold px-8 py-7 text-lg"
+                >
+                  Démarrer le benchmark gratuit
+                  <ArrowRight className="ml-2 w-5 h-5" />
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => setWorkshopOpen(true)}
+                  className="px-6 py-7 text-lg md:hidden"
+                >
+                  <Calendar className="w-5 h-5 mr-2" />
+                  Workshop exécutif
+                </Button>
+              </div>
+              
+              <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
+                <div className="flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-success animate-pulse" />
+                  2,847 dirigeants évalués ce mois
+                </div>
+                <span className="hidden sm:inline">•</span>
+                <Link 
+                  to="/methodologie" 
+                  className="flex items-center gap-1 hover:text-primary transition-colors group"
+                >
+                  <BookOpen className="w-4 h-4" />
+                  Découvrir notre modèle d'évaluation
+                  <ArrowRight className="w-3 h-3 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
+                </Link>
               </div>
             </div>
           </div>
@@ -107,6 +149,8 @@ export function LandingHero({ onStart }: LandingHeroProps) {
           </div>
         </div>
       </footer>
+
+      <WorkshopModal open={workshopOpen} onOpenChange={setWorkshopOpen} context="landing" />
     </div>
   );
 }
