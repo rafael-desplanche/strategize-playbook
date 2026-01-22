@@ -32,7 +32,7 @@ const pillars = [
       "Manque de sponsorship exécutif",
       "Absence de feuille de route cohérente"
     ],
-    color: "from-primary to-cyan-400"
+    color: "from-primary to-primary/70"
   },
   {
     id: "data-quality",
@@ -45,7 +45,7 @@ const pillars = [
       "Perte de confiance des utilisateurs métiers",
       "Non-conformité réglementaire (RGPD, etc.)"
     ],
-    color: "from-emerald-500 to-teal-400"
+    color: "from-primary to-primary/60"
   },
   {
     id: "data-infrastructure",
@@ -58,7 +58,7 @@ const pillars = [
       "Coûts d'infrastructure incontrôlés",
       "Dépendance excessive aux compétences rares"
     ],
-    color: "from-blue-500 to-indigo-400"
+    color: "from-primary to-primary/80"
   },
   {
     id: "analytics",
@@ -71,7 +71,7 @@ const pillars = [
       "Multiples versions de la vérité",
       "Time-to-insight trop long"
     ],
-    color: "from-violet-500 to-purple-400"
+    color: "from-primary to-primary/65"
   },
   {
     id: "ai-ml",
@@ -84,7 +84,7 @@ const pillars = [
       "POCs sans industrialisation",
       "Investissements IA prématurés"
     ],
-    color: "from-orange-500 to-amber-400"
+    color: "from-primary to-primary/75"
   },
   {
     id: "data-culture",
@@ -97,7 +97,7 @@ const pillars = [
       "Dépendance aux experts externes",
       "Faible adoption des outils"
     ],
-    color: "from-rose-500 to-pink-400"
+    color: "from-primary to-primary/55"
   }
 ];
 
@@ -107,35 +107,35 @@ const maturityLevels = [
     name: "Initial", 
     description: "Pratiques ad hoc, pas de processus formalisé",
     businessRead: "L'organisation réagit aux besoins data au cas par cas. Risque élevé d'erreurs et d'inefficacité.",
-    color: "bg-red-500"
+    color: "bg-primary/40 text-primary-foreground"
   },
   { 
     level: 2, 
     name: "Émergent", 
     description: "Processus en cours de définition, initiatives isolées",
     businessRead: "Prise de conscience du sujet data. Premières initiatives, mais manque de cohérence globale.",
-    color: "bg-orange-500"
+    color: "bg-primary/55 text-primary-foreground"
   },
   { 
     level: 3, 
     name: "Défini", 
     description: "Processus documentés et standardisés",
     businessRead: "Fondations solides en place. L'organisation peut commencer à capitaliser sur ses données.",
-    color: "bg-yellow-500"
+    color: "bg-primary/70 text-primary-foreground"
   },
   { 
     level: 4, 
     name: "Avancé", 
     description: "Processus optimisés et mesurés",
     businessRead: "Avantage compétitif visible. La data génère de la valeur mesurable.",
-    color: "bg-emerald-500"
+    color: "bg-[#7eda9d] text-primary"
   },
   { 
     level: 5, 
     name: "Leader", 
     description: "Amélioration continue, innovation data-driven",
     businessRead: "Référence du marché. La data est un différenciateur stratégique majeur.",
-    color: "bg-primary"
+    color: "bg-primary text-primary-foreground"
   }
 ];
 
@@ -364,7 +364,7 @@ export default function Methodology() {
             {maturityLevels.map((level) => (
               <div key={level.level} className="glass rounded-xl p-5 flex gap-4">
                 <div className={cn(
-                  "w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 font-display font-bold text-white",
+                  "w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 font-display font-bold",
                   level.color
                 )}>
                   {level.level}
