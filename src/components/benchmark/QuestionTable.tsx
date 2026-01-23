@@ -2,7 +2,7 @@ import { Domain } from "@/data/questions";
 
 interface QuestionTableProps {
   domain: Domain;
-  answersById: Map<string, number | "unknown" | "not_applicable">;
+  answersById: Map<string, number>;
   onAnswer: (questionId: string, value: number) => void;
 }
 
