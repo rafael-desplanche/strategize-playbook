@@ -5,6 +5,7 @@
 export interface Question {
   id: string;
   domain: string;
+  label: string; // Angle / dimension évaluée
   text: string;
   options: {
     value: number;
@@ -35,6 +36,7 @@ export const domains: Domain[] = [
       {
         id: "str-1",
         domain: "strategy",
+        label: "Data & AI vision",
         text: "La Data et l’IA occupent une place claire et explicite dans la vision stratégique de l’entreprise.",
         options: [
           { value: 1, label: "Non, la Data et l’IA ne font pas partie de notre vision stratégique." },
@@ -47,6 +49,7 @@ export const domains: Domain[] = [
       {
         id: "str-2",
         domain: "strategy",
+        label: "Business alignment",
         text: "Notre stratégie Data & AI est directement alignée avec nos objectifs business prioritaires.",
         options: [
           { value: 1, label: "Non, nous ne comprenons pas comment les lier." },
@@ -59,6 +62,7 @@ export const domains: Domain[] = [
       {
         id: "str-3",
         domain: "strategy",
+        label: "Executive sponsorship & leadership",
         text: "Les initiatives Data & AI sont portées et soutenues au niveau exécutif.",
         options: [
           { value: 1, label: "Non, il n’y a pas de soutien au niveau exécutif." },
@@ -71,6 +75,7 @@ export const domains: Domain[] = [
       {
         id: "str-4",
         domain: "strategy",
+        label: "Data-driven decision making",
         text: "Les décisions stratégiques et opérationnelles sont éclairées par la donnée.",
         options: [
           { value: 1, label: "La majorité de nos décisions ne sont pas guidées par la donnée." },
@@ -94,6 +99,7 @@ export const domains: Domain[] = [
       {
         id: "gov-1",
         domain: "governance",
+        label: "Ownership & responsibilities",
         text: "Les responsabilités liées à la gouvernance de la donnée et de l’IA sont clairement définies et assumées.",
         options: [
           { value: 1, label: "Aucune responsabilité claire n’est définie." },
@@ -106,6 +112,7 @@ export const domains: Domain[] = [
       {
         id: "gov-2",
         domain: "governance",
+        label: "Compliance & auditability",
         text: "La gouvernance Data & AI permet de répondre efficacement aux exigences réglementaires et d’audit.",
         options: [
           { value: 1, label: "La conformité est difficile à démontrer." },
@@ -118,6 +125,7 @@ export const domains: Domain[] = [
       {
         id: "gov-3",
         domain: "governance",
+        label: "AI risk management",
         text: "Les risques liés à l’usage de l’IA (biais, dérives, usages inappropriés) sont identifiés et maîtrisés.",
         options: [
           { value: 1, label: "Ces risques ne sont pas adressés." },
@@ -130,6 +138,7 @@ export const domains: Domain[] = [
       {
         id: "gov-4",
         domain: "governance",
+        label: "Governance as business enabler",
         text: "La gouvernance Data & AI est perçue comme un levier de confiance et de performance.",
         options: [
           { value: 1, label: "La gouvernance est perçue comme un frein." },
@@ -153,6 +162,7 @@ export const domains: Domain[] = [
       {
         id: "peo-1",
         domain: "people",
+        label: "Data literacy",
         text: "Les collaborateurs disposent d’un niveau de data literacy suffisant pour utiliser la donnée et l’IA de manière pertinente.",
         options: [
           { value: 1, label: "La majorité des collaborateurs ne sont pas data literate." },
@@ -165,6 +175,7 @@ export const domains: Domain[] = [
       {
         id: "peo-2",
         domain: "people",
+        label: "Critical thinking & interpretation",
         text: "Les collaborateurs savent interpréter, questionner et challenger les résultats produits par la donnée et l’IA.",
         options: [
           { value: 1, label: "Les résultats sont utilisés sans esprit critique." },
@@ -177,6 +188,7 @@ export const domains: Domain[] = [
       {
         id: "peo-3",
         domain: "people",
+        label: "Individual responsibility",
         text: "Les collaborateurs comprennent leur responsabilité individuelle dans l’usage de la donnée et de l’IA.",
         options: [
           { value: 1, label: "Ils ne se sentent pas responsables." },
@@ -189,6 +201,7 @@ export const domains: Domain[] = [
       {
         id: "peo-4",
         domain: "people",
+        label: "Responsible AI usage",
         text: "Les collaborateurs utilisent les outils d’IA dans un cadre clair et maîtrisé.",
         options: [
           { value: 1, label: "Les usages sont non encadrés et peu visibles." },
@@ -196,18 +209,6 @@ export const domains: Domain[] = [
           { value: 3, label: "Les usages sont encadrés sur certains périmètres." },
           { value: 4, label: "Les usages sont clairement définis et compris." },
           { value: 5, label: "L’IA est utilisée efficacement, de manière responsable." },
-        ],
-      },
-      {
-        id: "peo-5",
-        domain: "people",
-        text: "Les équipes sont autonomes pour utiliser la donnée et l’IA dans leur quotidien.",
-        options: [
-          { value: 1, label: "Les équipes dépendent fortement des experts data." },
-          { value: 2, label: "L’autonomie est très limitée." },
-          { value: 3, label: "Certaines équipes sont autonomes." },
-          { value: 4, label: "La majorité des équipes est autonome." },
-          { value: 5, label: "Les équipes sont autonomes et responsables à grande échelle." },
         ],
       },
     ],
@@ -245,7 +246,7 @@ export const industries = [
 
 export const companySizes = [
   { value: "individuel", label: "1" },
-  { value: "tpe", label: "TME (<10)" },
+  { value: "tpe", label: "TPE (<10)" },
   { value: "pme", label: "PME (50–249)" },
   { value: "eti", label: "ETI (250–4999)" },
   { value: "grande", label: "Grande entreprise (5000+)" },
