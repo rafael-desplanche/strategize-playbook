@@ -9,7 +9,7 @@ interface QuestionCardProps {
   domainIcon: string;
   questionNumber: number;
   totalQuestions: number;
-  onAnswer: (value: number | "unknown") => void;
+  onAnswer: (value: number) => void;
 }
 
 export function QuestionCard({ 
@@ -19,9 +19,9 @@ export function QuestionCard({
   totalQuestions,
   onAnswer 
 }: QuestionCardProps) {
-  const scaleValues = ["NSP", 1, 2, 3, 4, 5] as const;
-  const [selectedValue, setSelectedValue] = useState<number | "unknown" | null>(null);
-  const handleSelect = (value: number | "unknown") => {
+  const scaleValues = [0, 1, 2, 3, 4, 5] as const;
+  const [selectedValue, setSelectedValue] = useState<number | null>(null);
+  const handleSelect = (value: number) => {
     setSelectedValue(value);
   };
 
@@ -51,16 +51,14 @@ export function QuestionCard({
 
       {/* Options */}
       <div className="space-y-3 mb-8">
-        {scaleValues.map((value) => {
-          const resolvedValue = value === "NSP" ? "unknown" : value;
-          return (
+        {scaleValues.map((value) => (
           <button
             key={value}
-            onClick={() => handleSelect(resolvedValue)}
+            onClick={() => handleSelect(value)}
             className={cn(
               "w-full text-left p-4 rounded-xl border transition-all duration-200",
               "hover:border-primary/50 hover:bg-primary/5",
-              selectedValue === resolvedValue
+              selectedValue === value
                 ? "border-primary bg-primary/10 ring-2 ring-primary/20"
                 : "border-border bg-card/50"
             )}
@@ -69,14 +67,14 @@ export function QuestionCard({
               <div
                 className={cn(
                   "w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold transition-all",
-                  selectedValue === resolvedValue
+                  selectedValue === value
                     ? "bg-primary text-primary-foreground"
                     : "bg-muted text-muted-foreground"
                 )}
               >
-                {value}
+                {value === 0 ? "NSP" : value}
               </div>
-              {selectedValue === resolvedValue && (
+              {selectedValue === value && (
                 <svg className="w-6 h-6 text-primary animate-scale-in" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                 </svg>

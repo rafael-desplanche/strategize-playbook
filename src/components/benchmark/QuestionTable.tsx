@@ -1,10 +1,10 @@
 import { Domain } from "@/data/questions";
 import { cn } from "@/lib/utils";
 
-type AnswerValue = number | "unknown";
+type AnswerValue = number;
 
 const scaleOptions: { value: AnswerValue; label: string }[] = [
-  { value: "unknown", label: "NSP" },
+  { value: 0, label: "NSP" },
   { value: 1, label: "1" },
   { value: 2, label: "2" },
   { value: 3, label: "3" },
@@ -21,7 +21,7 @@ interface QuestionTableProps {
 export function QuestionTable({ domain, answersById, onAnswer }: QuestionTableProps) {
   const questions = domain.questions;
 
-  if (process.env.NODE_ENV !== "production") {
+  if (import.meta.env.DEV) {
     console.debug("[QuestionTable] questions", domain.id, questions.length);
   }
 
@@ -80,7 +80,7 @@ export function QuestionTable({ domain, answersById, onAnswer }: QuestionTablePr
                           className={cn(
                             "flex h-10 w-10 items-center justify-center rounded-md border transition-colors",
                             answersById.get(question.id) === option.value
-                              ? "border-primary bg-primary text-primary-foreground"
+                              ? "border-blue-600 bg-blue-600 text-white"
                               : "border-border bg-background text-muted-foreground"
                           )}
                         />
@@ -131,7 +131,7 @@ export function QuestionTable({ domain, answersById, onAnswer }: QuestionTablePr
                       className={cn(
                         "flex h-12 w-12 items-center justify-center rounded-md border transition-colors",
                         answersById.get(question.id) === option.value
-                          ? "border-primary bg-primary text-primary-foreground"
+                          ? "border-blue-600 bg-blue-600 text-white"
                           : "border-border bg-background text-muted-foreground"
                       )}
                     />

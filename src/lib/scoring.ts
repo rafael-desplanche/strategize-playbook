@@ -34,7 +34,7 @@ export interface Badge {
 
 export interface Answer {
   questionId: string;
-  value: number | "unknown";
+  value: number;
 }
 
 // Market benchmark data by industry (simulated)
@@ -76,10 +76,15 @@ export function calculateScores(answers: Answer[], industry: string): BenchmarkR
   for (const domain of domains) {
     let domainScore = 0;
     let answeredInDomain = 0;
-    
-    for (const answer of domainAnswers) {
-      domainScore += answer.value;
-      answeredInDomain++;
+
+    for (const question of domain.questions) {
+      const value = answerMap.get(question.id);
+      if (typeof value === "number") {
+        domainScore += value;
+        answeredInDomain++;
+      } else {
+        domainScore += 0;
+      }
     }
 
     const maxScore = domain.questions.length * 5;

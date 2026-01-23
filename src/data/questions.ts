@@ -69,6 +69,77 @@ export const domains: Domain[] = [
   },
 
   // --------------------------------------------------
+  // DATA MANAGEMENT, TOOLS & ARCHITECTURE
+  // --------------------------------------------------
+  {
+    id: "data_management",
+    name: "Data Management, Tools & Architecture",
+    description: "Plateforme, usages data, analytics et passage à l’échelle",
+    questions: [
+      {
+        id: "dat-1",
+        domain: "data_management",
+        label: "Data-driven operations",
+        text: "La donnée est intégrée dans l’ensemble des décisions, interactions et processus métiers.",
+      },
+      {
+        id: "dat-2",
+        domain: "data_management",
+        label: "Real-time data processing",
+        text: "La donnée est traitée et exploitée en temps réel ou quasi temps réel lorsque nécessaire.",
+      },
+      {
+        id: "dat-3",
+        domain: "data_management",
+        label: "Structured & unstructured data integration",
+        text: "L’architecture permet d’exploiter des données structurées et non structurées de façon intégrée.",
+      },
+      {
+        id: "dat-4",
+        domain: "data_management",
+        label: "Data as a product",
+        text: "La donnée est gérée comme un produit, avec des responsables identifiés et des usages clairs.",
+      },
+      {
+        id: "dat-5",
+        domain: "data_management",
+        label: "Secure self-service data access",
+        text: "Les équipes accèdent à la donnée via des mécanismes de self-service sécurisés.",
+      },
+      {
+        id: "dat-6",
+        domain: "data_management",
+        label: "Business, data & IT collaboration",
+        text: "La plateforme data facilite la collaboration entre les équipes métiers, data et IT.",
+      },
+      {
+        id: "dat-7",
+        domain: "data_management",
+        label: "Analytics value creation",
+        text: "Le niveau d’analytics permet de générer de la valeur business mesurable.",
+      },
+      {
+        id: "dat-8",
+        domain: "data_management",
+        label: "Unified & scalable data platform",
+        text: "L’architecture repose sur une plateforme data unifiée et scalable.",
+      },
+      {
+        id: "dat-9",
+        domain: "data_management",
+        label: "Cost-efficient scalability",
+        text: "L’architecture permet de scaler les usages data à coût maîtrisé.",
+      },
+      {
+        id: "dat-10",
+        domain: "data_management",
+        label: "Automated security, quality & resilience",
+        text: "La gestion de la sécurité, de la qualité et de la résilience de la plateforme data est largement automatisée.",
+      },
+    ],
+  },
+
+  // --------------------------------------------------
   // DATA MANAGEMENT 
 
     // --------------------------------------------------
@@ -173,7 +244,7 @@ export const domains: Domain[] = [
         label: "Governance as business enabler",
         text: "La gouvernance Data & AI est perçue comme un levier de confiance et de performance.",
       },
-            {
+      {
         id: "gov-5",
         domain: "governance",
         label: "Data & AI governance framework",
