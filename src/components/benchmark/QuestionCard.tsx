@@ -81,7 +81,8 @@ export function QuestionCard({
               )}
             </div>
           </button>
-        ))}
+        );
+        })}
       </div>
 
       {/* Action buttons */}
