@@ -23,7 +23,7 @@ export function BadgeDisplay({ badges }: BadgeDisplayProps) {
           )}
           style={{ animationDelay: `${index * 100}ms` }}
         >
-          <span className="text-xl">{badge.icon}</span>
+          {badge.icon && <span className="text-xl">{badge.icon}</span>}
           <div>
             <p className={cn(
               "text-sm font-medium",

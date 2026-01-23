@@ -160,7 +160,7 @@ function generateBadges(domainScores: DomainScore[], globalScore: number, maturi
     badges.push({
       id: "visionary",
       name: "Visionnaire Data",
-      icon: "🎯",
+      icon: "",
       description: "Stratégie data exemplaire",
       type: "positive",
     });
@@ -172,7 +172,7 @@ function generateBadges(domainScores: DomainScore[], globalScore: number, maturi
     badges.push({
       id: "quality-risk",
       name: "Zone de Risque",
-      icon: "⚠️",
+      icon: "",
       description: "Qualité des données à renforcer",
       type: "warning",
     });
@@ -180,7 +180,7 @@ function generateBadges(domainScores: DomainScore[], globalScore: number, maturi
     badges.push({
       id: "quality-champion",
       name: "Champion Qualité",
-      icon: "✨",
+      icon: "",
       description: "Excellence en qualité de données",
       type: "positive",
     });
@@ -192,7 +192,7 @@ function generateBadges(domainScores: DomainScore[], globalScore: number, maturi
     badges.push({
       id: "ai-pioneer",
       name: "Pionnier IA",
-      icon: "🤖",
+      icon: "",
       description: "Maturité IA avancée",
       type: "positive",
     });
@@ -204,7 +204,7 @@ function generateBadges(domainScores: DomainScore[], globalScore: number, maturi
     badges.push({
       id: "data-driven",
       name: "Data-Driven",
-      icon: "🧬",
+      icon: "",
       description: "Culture data forte",
       type: "achievement",
     });
@@ -215,7 +215,7 @@ function generateBadges(domainScores: DomainScore[], globalScore: number, maturi
     badges.push({
       id: "leader",
       name: "Leader Data",
-      icon: "🏆",
+      icon: "",
       description: "Dans le top quartile du marché",
       type: "achievement",
     });
@@ -225,7 +225,7 @@ function generateBadges(domainScores: DomainScore[], globalScore: number, maturi
     badges.push({
       id: "solid-foundations",
       name: "Fondations Solides",
-      icon: "🏗️",
+      icon: "",
       description: "Base solide pour accélérer",
       type: "positive",
     });
@@ -243,26 +243,4 @@ export function getMaturityLabel(level: number): string {
     5: "Optimisé",
   };
   return labels[level] || "Non défini";
-}
-
-export function getRecommendedCTA(maturityLevel: number): { title: string; description: string; action: string } {
-  if (maturityLevel <= 2) {
-    return {
-      title: "Data Quality & Risk Assessment",
-      description: "Évaluez et sécurisez vos fondations data avant d'accélérer",
-      action: "Planifier un diagnostic",
-    };
-  } else if (maturityLevel === 3) {
-    return {
-      title: "Roadmap Data & IA",
-      description: "Construisez votre feuille de route vers l'excellence data",
-      action: "Définir ma roadmap",
-    };
-  } else {
-    return {
-      title: "Industrialisation sur Databricks",
-      description: "Passez à l'échelle avec la plateforme leader du marché",
-      action: "Découvrir Databricks",
-    };
-  }
 }
