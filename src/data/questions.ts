@@ -123,6 +123,12 @@ export const domains: Domain[] = [
         label: "Responsible AI usage",
         text: "Les collaborateurs utilisent les outils d’IA dans un cadre clair et maîtrisé.",
       },
+      {
+        id: "peo-5",
+        domain: "people",
+        label: "Team autonomy",
+        text: "Les équipes sont autonomes pour utiliser la donnée et l’IA dans leur quotidien.",
+      },
     ],
   },
 ];
