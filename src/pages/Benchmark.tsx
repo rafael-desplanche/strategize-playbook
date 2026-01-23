@@ -59,7 +59,7 @@ export default function Benchmark() {
     setStep("questions");
   };
 
-  const handleAnswer = (questionId: string, value: number) => {
+  const handleAnswer = (questionId: string, value: Answer["value"]) => {
     setAnswers((prev) => {
       const existingIndex = prev.findIndex((answer) => answer.questionId === questionId);
       if (existingIndex === -1) {

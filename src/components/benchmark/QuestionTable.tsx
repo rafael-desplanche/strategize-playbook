@@ -1,12 +1,21 @@
 import { Domain } from "@/data/questions";
 
+type AnswerValue = number | "unknown";
+
+const scaleOptions: { value: AnswerValue; label: string }[] = [
+  { value: "unknown", label: "NSP" },
+  { value: 1, label: "1" },
+  { value: 2, label: "2" },
+  { value: 3, label: "3" },
+  { value: 4, label: "4" },
+  { value: 5, label: "5" },
+];
+
 interface QuestionTableProps {
   domain: Domain;
-  answersById: Map<string, number>;
-  onAnswer: (questionId: string, value: number) => void;
+  answersById: Map<string, AnswerValue>;
+  onAnswer: (questionId: string, value: AnswerValue) => void;
 }
-
-const scaleValues = [1, 2, 3, 4, 5];
 
 export function QuestionTable({ domain, answersById, onAnswer }: QuestionTableProps) {
   const questions = domain.questions;
@@ -21,18 +30,18 @@ export function QuestionTable({ domain, answersById, onAnswer }: QuestionTablePr
         <div className="overflow-x-auto">
           <div className="min-w-[640px]">
             <div className="sticky top-0 z-10 bg-card/95 backdrop-blur-sm">
-              <div className="grid grid-cols-[minmax(280px,1fr)_repeat(5,56px)] gap-2 items-end px-4 pt-3 pb-2">
+              <div className="grid grid-cols-[minmax(280px,1fr)_repeat(6,56px)] gap-2 items-end px-4 pt-3 pb-2">
                 <div />
-                <div className="col-span-5 flex flex-col items-end gap-1">
+                <div className="col-span-6 flex flex-col items-end gap-1">
                   <span className="text-[11px] font-semibold text-emerald-600">High Achiever</span>
                   <div className="h-1.5 w-full rounded-full bg-gradient-to-r from-red-500 via-amber-400 to-emerald-500" />
                 </div>
               </div>
-              <div className="grid grid-cols-[minmax(280px,1fr)_repeat(5,56px)] gap-2 items-center px-4 py-3 bg-muted/40 text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+              <div className="grid grid-cols-[minmax(280px,1fr)_repeat(6,56px)] gap-2 items-center px-4 py-3 bg-muted/40 text-xs font-semibold text-muted-foreground uppercase tracking-wide">
                 <div>Questions</div>
-                {scaleValues.map((value) => (
-                  <div key={value} className="text-center">
-                    {value}
+                {scaleOptions.map((option) => (
+                  <div key={option.label} className="text-center">
+                    {option.label}
                   </div>
                 ))}
               </div>
@@ -43,29 +52,31 @@ export function QuestionTable({ domain, answersById, onAnswer }: QuestionTablePr
                 return (
                   <div
                     key={question.id}
-                    className="grid grid-cols-[minmax(280px,1fr)_repeat(5,56px)] gap-2 items-center px-4 py-4 text-sm"
+                    className="grid grid-cols-[minmax(280px,1fr)_repeat(6,56px)] gap-2 items-center px-4 py-4 text-sm"
                   >
                     <div className="text-foreground">
                       <span className="text-muted-foreground mr-2">{index + 1}.</span>
                       {question.text}
                     </div>
-                    {scaleValues.map((value) => (
+                    {scaleOptions.map((option) => (
                       <label
-                        key={value}
-                        htmlFor={`${inputName}-${value}`}
-                        className="flex h-full w-full cursor-pointer items-center justify-center gap-2 rounded-md px-1 py-2"
+                        key={option.label}
+                        htmlFor={`${inputName}-${option.label}`}
+                        className="flex h-full w-full cursor-pointer items-center justify-center"
                       >
                         <input
                           type="radio"
                           name={inputName}
-                          value={value}
-                          id={`${inputName}-${value}`}
-                          checked={answersById.get(question.id) === value}
-                          onChange={() => onAnswer(question.id, value)}
-                          aria-label={`${question.text} - ${value}`}
-                          className="h-4 w-4 text-primary focus-visible:ring-primary"
+                          value={option.label}
+                          id={`${inputName}-${option.label}`}
+                          checked={answersById.get(question.id) === option.value}
+                          onChange={() => onAnswer(question.id, option.value)}
+                          aria-label={`${question.text} - ${option.label}`}
+                          className="sr-only peer"
                         />
-                        <span className="text-xs font-medium text-muted-foreground">{value}</span>
+                        <span className="flex h-10 w-10 items-center justify-center rounded-md border border-border text-xs font-semibold text-muted-foreground transition-colors peer-checked:border-primary peer-checked:bg-primary peer-checked:text-primary-foreground">
+                          {option.label}
+                        </span>
                       </label>
                     ))}
                   </div>
@@ -92,23 +103,25 @@ export function QuestionTable({ domain, answersById, onAnswer }: QuestionTablePr
                 {question.text}
               </div>
               <div className="mt-4 flex items-center justify-between gap-2">
-                {scaleValues.map((value) => (
+                {scaleOptions.map((option) => (
                   <label
-                    key={value}
-                    htmlFor={`${inputName}-${value}`}
-                    className="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-md px-2 py-2"
+                    key={option.label}
+                    htmlFor={`${inputName}-${option.label}`}
+                    className="flex flex-1 cursor-pointer items-center justify-center"
                   >
                     <input
                       type="radio"
                       name={inputName}
-                      value={value}
-                      id={`${inputName}-${value}`}
-                      checked={answersById.get(question.id) === value}
-                      onChange={() => onAnswer(question.id, value)}
-                      aria-label={`${question.text} - ${value}`}
-                      className="h-6 w-6 text-primary focus-visible:ring-primary"
+                      value={option.label}
+                      id={`${inputName}-${option.label}`}
+                      checked={answersById.get(question.id) === option.value}
+                      onChange={() => onAnswer(question.id, option.value)}
+                      aria-label={`${question.text} - ${option.label}`}
+                      className="sr-only peer"
                     />
-                    <span className="text-sm font-medium text-muted-foreground">{value}</span>
+                    <span className="flex h-12 w-12 items-center justify-center rounded-md border border-border text-sm font-semibold text-muted-foreground transition-colors peer-checked:border-primary peer-checked:bg-primary peer-checked:text-primary-foreground">
+                      {option.label}
+                    </span>
                   </label>
                 ))}
               </div>
