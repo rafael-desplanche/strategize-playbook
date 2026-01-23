@@ -75,7 +75,6 @@ export default function Benchmark() {
     return currentDomain.questions.every((question) => answersById.has(question.id));
   }, [answersById, currentDomain]);
 
-  const resolvedIndustry = userData.industry || "other";
   const result: BenchmarkResult | null = useMemo(() => {
     if (step === "results") {
       return calculateScores(answers, resolvedIndustry);

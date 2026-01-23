@@ -5,10 +5,7 @@ import { ScoreGauge } from "./ScoreGauge";
 import { MarketPosition } from "./MarketPosition";
 import { BadgeDisplay } from "./BadgeDisplay";
 import { WorkshopModal } from "./WorkshopModal";
-import { MaturityCurve } from "./MaturityCurve";
 import { TrendingUp, AlertTriangle, Calendar, MessageSquare } from "lucide-react";
-import html2canvas from "html2canvas";
-import { jsPDF } from "jspdf";
 
 interface ResultsPreviewProps {
   result: BenchmarkResult;
@@ -19,13 +16,6 @@ interface ResultsPreviewProps {
 
 export function ResultsPreview({ result, userName, industry, industryLabel }: ResultsPreviewProps) {
   const [workshopOpen, setWorkshopOpen] = useState(false);
-  const [isExporting, setIsExporting] = useState(false);
-  const reportRef = useRef<HTMLDivElement | null>(null);
-  const industryStatusCopy = {
-    below: "En dessous du benchmark sectoriel",
-    aligned: "Aligné avec le benchmark sectoriel",
-    above: "Au-dessus du benchmark sectoriel",
-  } as const;
   const domainScoreMap = new Map(result.domainScores.map((domain) => [domain.domainId, domain]));
   const getDomainAverage = (domainId: string) => {
     const domain = domainScoreMap.get(domainId);
@@ -84,34 +74,6 @@ export function ResultsPreview({ result, userName, industry, industryLabel }: Re
     `Next focus: move toward ${nextStage} by tightening governance, platform scalability, and skills adoption.`,
   ];
 
-  const handleExportPdf = async () => {
-    if (!reportRef.current || isExporting) return;
-    setIsExporting(true);
-    const canvas = await html2canvas(reportRef.current, {
-      scale: 2,
-      useCORS: true,
-      backgroundColor: null,
-    });
-    const imgData = canvas.toDataURL("image/png");
-    const pdf = new jsPDF("p", "mm", "a4");
-    const pageWidth = pdf.internal.pageSize.getWidth();
-    const pageHeight = pdf.internal.pageSize.getHeight();
-    const imgWidth = pageWidth;
-    const imgHeight = (canvas.height * imgWidth) / canvas.width;
-    let position = 0;
-
-    pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
-
-    while (imgHeight + position > pageHeight) {
-      position -= pageHeight;
-      pdf.addPage();
-      pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
-    }
-
-    pdf.save("baybridgedigital-report.pdf");
-    setIsExporting(false);
-  };
-
   return (
     <div className="animate-fade-up">
       <div className="flex justify-end mb-4">
@@ -168,29 +130,6 @@ export function ResultsPreview({ result, userName, industry, industryLabel }: Re
           {interpretation.map((line) => (
             <p key={line}>{line}</p>
           ))}
-        </div>
-      </div>
-
-      <div className="mb-10 rounded-2xl border border-border/60 bg-card/60 p-6">
-        <h3 className="text-lg font-display font-semibold text-foreground mb-2">Benchmark industrie</h3>
-        <p className="text-sm text-muted-foreground mb-4">
-          Industrie de référence : <span className="text-foreground font-medium">{industryLabel}</span>
-        </p>
-        <div className="grid gap-4 sm:grid-cols-3">
-          <div className="rounded-xl border border-border/60 bg-background/60 p-4">
-            <p className="text-xs text-muted-foreground mb-1">High Achievers (industrie)</p>
-            <p className="text-2xl font-semibold text-foreground">{result.highAchieverRate}%</p>
-          </div>
-          <div className="rounded-xl border border-border/60 bg-background/60 p-4">
-            <p className="text-xs text-muted-foreground mb-1">Votre position</p>
-            <p className="text-2xl font-semibold text-foreground">
-              {industryStatusCopy[result.highAchieverStatus]}
-            </p>
-          </div>
-          <div className="rounded-xl border border-border/60 bg-background/60 p-4">
-            <p className="text-xs text-muted-foreground mb-1">Score global (toutes réponses)</p>
-            <p className="text-2xl font-semibold text-foreground">{result.globalScore}</p>
-          </div>
         </div>
       </div>
 
@@ -257,7 +196,6 @@ export function ResultsPreview({ result, userName, industry, industryLabel }: Re
         </div>
       </div>
 
-      </div>
       <WorkshopModal 
         open={workshopOpen} 
         onOpenChange={setWorkshopOpen} 

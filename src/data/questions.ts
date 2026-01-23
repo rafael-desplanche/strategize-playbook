@@ -69,6 +69,9 @@ export const domains: Domain[] = [
   },
 
   // --------------------------------------------------
+  // DATA MANAGEMENT 
+
+    // --------------------------------------------------
   // DATA MANAGEMENT, TOOLS & ARCHITECTURE
   // --------------------------------------------------
   {
@@ -139,7 +142,6 @@ export const domains: Domain[] = [
     ],
   },
 
-  // --------------------------------------------------
   // GOVERNANCE & RISK MANAGEMENT
   // --------------------------------------------------
   {
@@ -171,7 +173,7 @@ export const domains: Domain[] = [
         label: "Governance as business enabler",
         text: "La gouvernance Data & AI est perçue comme un levier de confiance et de performance.",
       },
-      {
+            {
         id: "gov-5",
         domain: "governance",
         label: "Data & AI governance framework",
