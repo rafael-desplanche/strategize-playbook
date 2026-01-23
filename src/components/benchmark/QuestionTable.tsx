@@ -9,6 +9,12 @@ interface QuestionTableProps {
 const scaleValues = [1, 2, 3, 4, 5];
 
 export function QuestionTable({ domain, answersById, onAnswer }: QuestionTableProps) {
+  const questions = domain.questions;
+
+  if (process.env.NODE_ENV !== "production") {
+    console.debug("[QuestionTable] questions", domain.id, questions.length);
+  }
+
   return (
     <div className="space-y-4 animate-fade-up">
       <div className="rounded-2xl border border-border/60 bg-card/60 overflow-hidden hidden md:block">
@@ -32,7 +38,7 @@ export function QuestionTable({ domain, answersById, onAnswer }: QuestionTablePr
               </div>
             </div>
             <div className="divide-y divide-border/70">
-              {domain.questions.map((question, index) => (
+              {questions.map((question, index) => (
                 <div
                   key={question.id}
                   className="grid grid-cols-[minmax(280px,1fr)_repeat(5,56px)] gap-2 items-center px-4 py-4 text-sm"
@@ -68,7 +74,7 @@ export function QuestionTable({ domain, answersById, onAnswer }: QuestionTablePr
             <div className="h-1.5 flex-1 rounded-full bg-gradient-to-r from-red-500 via-amber-400 to-emerald-500" />
           </div>
         </div>
-        {domain.questions.map((question, index) => (
+        {questions.map((question, index) => (
           <div key={question.id} className="rounded-2xl border border-border/60 bg-card/60 px-4 py-4">
             <div className="text-sm text-foreground">
               <span className="text-muted-foreground mr-2">{index + 1}.</span>
