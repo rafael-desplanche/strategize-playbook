@@ -2,7 +2,7 @@ import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { LeadCaptureForm } from "@/components/benchmark/LeadCaptureForm";
 import { OnboardingFlow } from "@/components/benchmark/OnboardingFlow";
-import { QuestionCard } from "@/components/benchmark/QuestionCard";
+import { QuestionTable } from "@/components/benchmark/QuestionTable";
 import { ProgressBar } from "@/components/benchmark/ProgressBar";
 import { DomainProgress } from "@/components/benchmark/DomainProgress";
 import { ResultsPreview } from "@/components/benchmark/ResultsPreview";
@@ -30,18 +30,17 @@ export default function Benchmark() {
   const [userData, setUserData] = useState<Partial<UserData>>({});
   const [answers, setAnswers] = useState<Answer[]>([]);
   const [currentDomainIndex, setCurrentDomainIndex] = useState(0);
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
 
   // Flatten all questions for progress tracking
   const allQuestions = useMemo(() => {
-    return domains.flatMap((domain) => 
-      domain.questions.map((q) => ({ ...q, domainIcon: domain.icon }))
-    );
+    return domains.flatMap((domain) => domain.questions);
   }, []);
 
   const currentDomain = domains[currentDomainIndex];
-  const currentQuestion = currentDomain?.questions[currentQuestionIndex];
-  const totalAnswered = answers.length;
+  const answersById = useMemo(() => {
+    return new Map(answers.map((answer) => [answer.questionId, answer.value]));
+  }, [answers]);
+  const totalAnswered = answersById.size;
   const totalQuestions = allQuestions.length;
 
   const completedDomains = useMemo(() => {
@@ -60,25 +59,22 @@ export default function Benchmark() {
     setStep("questions");
   };
 
-  const handleAnswer = (value: number | "unknown" | "not_applicable") => {
-    const newAnswer: Answer = {
-      questionId: currentQuestion.id,
-      value,
-    };
-    
-    setAnswers((prev) => [...prev, newAnswer]);
-
-    // Move to next question or domain
-    if (currentQuestionIndex < currentDomain.questions.length - 1) {
-      setCurrentQuestionIndex((prev) => prev + 1);
-    } else if (currentDomainIndex < domains.length - 1) {
-      setCurrentDomainIndex((prev) => prev + 1);
-      setCurrentQuestionIndex(0);
-    } else {
-      // All done - show results
-      setStep("results");
-    }
+  const handleAnswer = (questionId: string, value: Answer["value"]) => {
+    setAnswers((prev) => {
+      const existingIndex = prev.findIndex((answer) => answer.questionId === questionId);
+      if (existingIndex === -1) {
+        return [...prev, { questionId, value }];
+      }
+      const updated = [...prev];
+      updated[existingIndex] = { questionId, value };
+      return updated;
+    });
   };
+
+  const isCurrentDomainComplete = useMemo(() => {
+    if (!currentDomain) return false;
+    return currentDomain.questions.every((question) => answersById.has(question.id));
+  }, [answersById, currentDomain]);
 
   const result: BenchmarkResult | null = useMemo(() => {
     if (step === "results" && userData.industry) {
@@ -104,17 +100,8 @@ export default function Benchmark() {
     }
 
     if (step === "questions") {
-      setAnswers((prev) => prev.slice(0, -1));
-      if (currentQuestionIndex > 0) {
-        setCurrentQuestionIndex((prev) => prev - 1);
-        return;
-      }
-
       if (currentDomainIndex > 0) {
-        const previousDomainIndex = currentDomainIndex - 1;
-        const previousDomain = domains[previousDomainIndex];
-        setCurrentDomainIndex(previousDomainIndex);
-        setCurrentQuestionIndex(previousDomain.questions.length - 1);
+        setCurrentDomainIndex((prev) => prev - 1);
         return;
       }
 
@@ -152,7 +139,7 @@ export default function Benchmark() {
               )}
               {step === "questions" && (
                 <ProgressBar 
-                  current={totalAnswered + 1} 
+                  current={totalAnswered} 
                   total={totalQuestions} 
                   showLabel={false}
                   className="w-32 sm:w-48"
@@ -175,7 +162,7 @@ export default function Benchmark() {
           <OnboardingFlow onComplete={handleOnboardingComplete} />
         )}
 
-        {step === "questions" && currentQuestion && (
+        {step === "questions" && currentDomain && (
           <div>
             {/* Domain progress */}
             <div className="mb-8">
@@ -187,28 +174,43 @@ export default function Benchmark() {
 
             {/* Current domain indicator */}
             <div className="mb-6">
-              <h3 className="text-sm font-medium text-primary">
-                {currentDomain.icon} {currentDomain.name}
-              </h3>
+              <h3 className="text-sm font-medium text-primary">{currentDomain.name}</h3>
               <p className="text-sm text-muted-foreground">
                 {currentDomain.description}
               </p>
+              <p className="text-xs font-semibold text-muted-foreground mt-2">
+                {currentDomain.questions.length} questions
+              </p>
             </div>
 
-            {/* Question card */}
-            <QuestionCard
-              key={currentQuestion.id}
-              question={currentQuestion}
-              domainIcon={currentDomain.icon}
-              questionNumber={currentQuestionIndex + 1}
-              totalQuestions={currentDomain.questions.length}
+            {/* Questions table */}
+            <QuestionTable
+              domain={currentDomain}
+              answersById={answersById}
               onAnswer={handleAnswer}
             />
+
+            <div className="mt-8 flex flex-col sm:flex-row items-start sm:items-center justify-end gap-3">
+              <Button
+                onClick={() => {
+                  if (!isCurrentDomainComplete) return;
+                  if (currentDomainIndex < domains.length - 1) {
+                    setCurrentDomainIndex((prev) => prev + 1);
+                  } else {
+                    setStep("results");
+                  }
+                }}
+                disabled={!isCurrentDomainComplete}
+                className="w-full sm:w-auto btn-primary text-primary-foreground font-semibold px-8 py-6"
+              >
+                {currentDomainIndex < domains.length - 1 ? "Catégorie suivante" : "Voir les résultats"}
+              </Button>
+            </div>
 
             {/* Progress */}
             <div className="mt-10">
               <ProgressBar 
-                current={totalAnswered + 1} 
+                current={totalAnswered} 
                 total={totalQuestions}
               />
             </div>
