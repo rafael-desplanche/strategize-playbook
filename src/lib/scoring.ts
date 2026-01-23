@@ -51,6 +51,7 @@ const industryBenchmarks: Record<string, { mean: number; p25: number; p50: numbe
 
 export function calculateScores(answers: Answer[], industry: string): BenchmarkResult {
   const domainScores: DomainScore[] = [];
+  const answerMap = new Map(answers.map((answer) => [answer.questionId, answer.value]));
   let totalScore = 0;
   let totalMaxScore = 0;
   let answeredTotal = 0;
@@ -58,10 +59,6 @@ export function calculateScores(answers: Answer[], industry: string): BenchmarkR
 
   // Calculate score per domain
   for (const domain of domains) {
-    const domainAnswers = answers.filter((a) => 
-      domain.questions.some((q) => q.id === a.questionId)
-    );
-    
     let domainScore = 0;
     let answeredInDomain = 0;
     
@@ -69,10 +66,10 @@ export function calculateScores(answers: Answer[], industry: string): BenchmarkR
       domainScore += answer.value;
       answeredInDomain++;
     }
-    
+
     const maxScore = domain.questions.length * 5;
-    const percentage = answeredInDomain > 0 
-      ? Math.round((domainScore / (answeredInDomain * 5)) * 100) 
+    const percentage = maxScore > 0
+      ? Math.round((domainScore / maxScore) * 100)
       : 0;
     
     domainScores.push({
@@ -92,13 +89,13 @@ export function calculateScores(answers: Answer[], industry: string): BenchmarkR
   }
 
   // Global percentage
-  const globalPercentage = answeredTotal > 0 
-    ? Math.round((totalScore / (answeredTotal * 5)) * 100) 
+  const globalPercentage = totalMaxScore > 0
+    ? Math.round((totalScore / totalMaxScore) * 100)
     : 0;
   
   // Global score (1-5 scale)
-  const globalScore = answeredTotal > 0 
-    ? Number((totalScore / answeredTotal).toFixed(1)) 
+  const globalScore = totalQuestions > 0
+    ? Number((totalScore / totalQuestions).toFixed(1))
     : 0;
 
   // Market position calculation
