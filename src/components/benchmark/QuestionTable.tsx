@@ -38,30 +38,39 @@ export function QuestionTable({ domain, answersById, onAnswer }: QuestionTablePr
               </div>
             </div>
             <div className="divide-y divide-border/70">
-              {questions.map((question, index) => (
-                <div
-                  key={question.id}
-                  className="grid grid-cols-[minmax(280px,1fr)_repeat(5,56px)] gap-2 items-center px-4 py-4 text-sm"
-                >
-                  <div className="text-foreground">
-                    <span className="text-muted-foreground mr-2">{index + 1}.</span>
-                    {question.text}
+              {questions.map((question, index) => {
+                const inputName = `question-${domain.id}-${question.id}`;
+                return (
+                  <div
+                    key={question.id}
+                    className="grid grid-cols-[minmax(280px,1fr)_repeat(5,56px)] gap-2 items-center px-4 py-4 text-sm"
+                  >
+                    <div className="text-foreground">
+                      <span className="text-muted-foreground mr-2">{index + 1}.</span>
+                      {question.text}
+                    </div>
+                    {scaleValues.map((value) => (
+                      <label
+                        key={value}
+                        htmlFor={`${inputName}-${value}`}
+                        className="flex h-full w-full cursor-pointer items-center justify-center gap-2 rounded-md px-1 py-2"
+                      >
+                        <input
+                          type="radio"
+                          name={inputName}
+                          value={value}
+                          id={`${inputName}-${value}`}
+                          checked={answersById.get(question.id) === value}
+                          onChange={() => onAnswer(question.id, value)}
+                          aria-label={`${question.text} - ${value}`}
+                          className="h-4 w-4 text-primary focus-visible:ring-primary"
+                        />
+                        <span className="text-xs font-medium text-muted-foreground">{value}</span>
+                      </label>
+                    ))}
                   </div>
-                  {scaleValues.map((value) => (
-                    <label key={value} className="flex items-center justify-center">
-                      <input
-                        type="radio"
-                        name={`question-${question.id}`}
-                        value={value}
-                        checked={answersById.get(question.id) === value}
-                        onChange={() => onAnswer(question.id, value)}
-                        aria-label={`${question.text} - ${value}`}
-                        className="h-4 w-4 text-primary focus-visible:ring-primary"
-                      />
-                    </label>
-                  ))}
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         </div>
@@ -74,29 +83,38 @@ export function QuestionTable({ domain, answersById, onAnswer }: QuestionTablePr
             <div className="h-1.5 flex-1 rounded-full bg-gradient-to-r from-red-500 via-amber-400 to-emerald-500" />
           </div>
         </div>
-        {questions.map((question, index) => (
-          <div key={question.id} className="rounded-2xl border border-border/60 bg-card/60 px-4 py-4">
-            <div className="text-sm text-foreground">
-              <span className="text-muted-foreground mr-2">{index + 1}.</span>
-              {question.text}
+        {questions.map((question, index) => {
+          const inputName = `question-${domain.id}-${question.id}`;
+          return (
+            <div key={question.id} className="rounded-2xl border border-border/60 bg-card/60 px-4 py-4">
+              <div className="text-sm text-foreground">
+                <span className="text-muted-foreground mr-2">{index + 1}.</span>
+                {question.text}
+              </div>
+              <div className="mt-4 flex items-center justify-between gap-2">
+                {scaleValues.map((value) => (
+                  <label
+                    key={value}
+                    htmlFor={`${inputName}-${value}`}
+                    className="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-md px-2 py-2"
+                  >
+                    <input
+                      type="radio"
+                      name={inputName}
+                      value={value}
+                      id={`${inputName}-${value}`}
+                      checked={answersById.get(question.id) === value}
+                      onChange={() => onAnswer(question.id, value)}
+                      aria-label={`${question.text} - ${value}`}
+                      className="h-6 w-6 text-primary focus-visible:ring-primary"
+                    />
+                    <span className="text-sm font-medium text-muted-foreground">{value}</span>
+                  </label>
+                ))}
+              </div>
             </div>
-            <div className="mt-4 flex items-center justify-between gap-2">
-              {scaleValues.map((value) => (
-                <label key={value} className="flex flex-1 items-center justify-center">
-                  <input
-                    type="radio"
-                    name={`question-${question.id}`}
-                    value={value}
-                    checked={answersById.get(question.id) === value}
-                    onChange={() => onAnswer(question.id, value)}
-                    aria-label={`${question.text} - ${value}`}
-                    className="h-6 w-6 text-primary focus-visible:ring-primary"
-                  />
-                </label>
-              ))}
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
