@@ -32,7 +32,7 @@ export interface Badge {
 
 export interface Answer {
   questionId: string;
-  value: number | "unknown" | "not_applicable";
+  value: number;
 }
 
 // Market benchmark data by industry (simulated)
@@ -51,6 +51,7 @@ const industryBenchmarks: Record<string, { mean: number; p25: number; p50: numbe
 
 export function calculateScores(answers: Answer[], industry: string): BenchmarkResult {
   const domainScores: DomainScore[] = [];
+  const answerMap = new Map(answers.map((answer) => [answer.questionId, answer.value]));
   let totalScore = 0;
   let totalMaxScore = 0;
   let answeredTotal = 0;
@@ -58,23 +59,22 @@ export function calculateScores(answers: Answer[], industry: string): BenchmarkR
 
   // Calculate score per domain
   for (const domain of domains) {
-    const domainAnswers = answers.filter((a) => 
-      domain.questions.some((q) => q.id === a.questionId)
-    );
-    
     let domainScore = 0;
     let answeredInDomain = 0;
-    
-    for (const answer of domainAnswers) {
-      if (typeof answer.value === "number") {
-        domainScore += answer.value;
+
+    for (const question of domain.questions) {
+      const value = answerMap.get(question.id);
+      if (typeof value === "number") {
+        domainScore += value;
         answeredInDomain++;
+      } else {
+        domainScore += 0;
       }
     }
-    
+
     const maxScore = domain.questions.length * 5;
-    const percentage = answeredInDomain > 0 
-      ? Math.round((domainScore / (answeredInDomain * 5)) * 100) 
+    const percentage = maxScore > 0
+      ? Math.round((domainScore / maxScore) * 100)
       : 0;
     
     domainScores.push({
@@ -94,13 +94,13 @@ export function calculateScores(answers: Answer[], industry: string): BenchmarkR
   }
 
   // Global percentage
-  const globalPercentage = answeredTotal > 0 
-    ? Math.round((totalScore / (answeredTotal * 5)) * 100) 
+  const globalPercentage = totalMaxScore > 0
+    ? Math.round((totalScore / totalMaxScore) * 100)
     : 0;
   
   // Global score (1-5 scale)
-  const globalScore = answeredTotal > 0 
-    ? Number((totalScore / answeredTotal).toFixed(1)) 
+  const globalScore = totalQuestions > 0
+    ? Number((totalScore / totalQuestions).toFixed(1))
     : 0;
 
   // Market position calculation
@@ -162,7 +162,7 @@ function generateBadges(domainScores: DomainScore[], globalScore: number, maturi
     badges.push({
       id: "visionary",
       name: "Visionnaire Data",
-      icon: "🎯",
+      icon: "",
       description: "Stratégie data exemplaire",
       type: "positive",
     });
@@ -174,7 +174,7 @@ function generateBadges(domainScores: DomainScore[], globalScore: number, maturi
     badges.push({
       id: "quality-risk",
       name: "Zone de Risque",
-      icon: "⚠️",
+      icon: "",
       description: "Qualité des données à renforcer",
       type: "warning",
     });
@@ -182,7 +182,7 @@ function generateBadges(domainScores: DomainScore[], globalScore: number, maturi
     badges.push({
       id: "quality-champion",
       name: "Champion Qualité",
-      icon: "✨",
+      icon: "",
       description: "Excellence en qualité de données",
       type: "positive",
     });
@@ -194,7 +194,7 @@ function generateBadges(domainScores: DomainScore[], globalScore: number, maturi
     badges.push({
       id: "ai-pioneer",
       name: "Pionnier IA",
-      icon: "🤖",
+      icon: "",
       description: "Maturité IA avancée",
       type: "positive",
     });
@@ -206,7 +206,7 @@ function generateBadges(domainScores: DomainScore[], globalScore: number, maturi
     badges.push({
       id: "data-driven",
       name: "Data-Driven",
-      icon: "🧬",
+      icon: "",
       description: "Culture data forte",
       type: "achievement",
     });
@@ -217,7 +217,7 @@ function generateBadges(domainScores: DomainScore[], globalScore: number, maturi
     badges.push({
       id: "leader",
       name: "Leader Data",
-      icon: "🏆",
+      icon: "",
       description: "Dans le top quartile du marché",
       type: "achievement",
     });
@@ -227,7 +227,7 @@ function generateBadges(domainScores: DomainScore[], globalScore: number, maturi
     badges.push({
       id: "solid-foundations",
       name: "Fondations Solides",
-      icon: "🏗️",
+      icon: "",
       description: "Base solide pour accélérer",
       type: "positive",
     });
@@ -245,26 +245,4 @@ export function getMaturityLabel(level: number): string {
     5: "Optimisé",
   };
   return labels[level] || "Non défini";
-}
-
-export function getRecommendedCTA(maturityLevel: number): { title: string; description: string; action: string } {
-  if (maturityLevel <= 2) {
-    return {
-      title: "Data Quality & Risk Assessment",
-      description: "Évaluez et sécurisez vos fondations data avant d'accélérer",
-      action: "Planifier un diagnostic",
-    };
-  } else if (maturityLevel === 3) {
-    return {
-      title: "Roadmap Data & IA",
-      description: "Construisez votre feuille de route vers l'excellence data",
-      action: "Définir ma roadmap",
-    };
-  } else {
-    return {
-      title: "Industrialisation sur Databricks",
-      description: "Passez à l'échelle avec la plateforme leader du marché",
-      action: "Découvrir Databricks",
-    };
-  }
 }
