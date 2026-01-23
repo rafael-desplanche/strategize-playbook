@@ -1,10 +1,10 @@
 import { Domain } from "@/data/questions";
 import { cn } from "@/lib/utils";
 
-type AnswerValue = number;
+type AnswerValue = number | "unknown";
 
 const scaleOptions: { value: AnswerValue; label: string }[] = [
-  { value: 0, label: "NSP" },
+  { value: "unknown", label: "NSP" },
   { value: 1, label: "1" },
   { value: 2, label: "2" },
   { value: 3, label: "3" },
@@ -80,7 +80,7 @@ export function QuestionTable({ domain, answersById, onAnswer }: QuestionTablePr
                           className={cn(
                             "flex h-10 w-10 items-center justify-center rounded-md border transition-colors",
                             answersById.get(question.id) === option.value
-                              ? "border-blue-600 bg-blue-600 text-white"
+                              ? "border-primary bg-primary text-primary-foreground"
                               : "border-border bg-background text-muted-foreground"
                           )}
                         />
@@ -131,7 +131,7 @@ export function QuestionTable({ domain, answersById, onAnswer }: QuestionTablePr
                       className={cn(
                         "flex h-12 w-12 items-center justify-center rounded-md border transition-colors",
                         answersById.get(question.id) === option.value
-                          ? "border-blue-600 bg-blue-600 text-white"
+                          ? "border-primary bg-primary text-primary-foreground"
                           : "border-border bg-background text-muted-foreground"
                       )}
                     />

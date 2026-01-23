@@ -5,7 +5,6 @@ import { ScoreGauge } from "./ScoreGauge";
 import { MarketPosition } from "./MarketPosition";
 import { BadgeDisplay } from "./BadgeDisplay";
 import { WorkshopModal } from "./WorkshopModal";
-import { MaturityCurve } from "./MaturityCurve";
 import { TrendingUp, AlertTriangle, Calendar, MessageSquare } from "lucide-react";
 
 interface ResultsPreviewProps {
