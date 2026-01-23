@@ -45,15 +45,14 @@ export function MaturityCurve({ score, label, highlightRange = [0.14, 0.43], not
   })();
 
   return (
-    <div className="space-y-4">
-      <div className="rounded-2xl border border-border/60 bg-card/60 px-4 py-6">
-        <div className="relative">
-          <svg viewBox="0 0 100 100" className="w-full h-64">
-            <defs>
-              <linearGradient id="curveStroke" x1="0" y1="0" x2="1" y2="0">
-                <stop offset="0%" stopColor="hsl(var(--muted-foreground))" />
-                <stop offset="100%" stopColor="hsl(var(--primary))" />
-              </linearGradient>
+    <div className="rounded-2xl border border-border/60 bg-card/60 px-4 py-6">
+      <div className="relative overflow-hidden rounded-xl bg-background/40 px-2 py-4 sm:px-4">
+        <svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet" className="w-full h-56 sm:h-64 lg:h-72">
+          <defs>
+            <linearGradient id="curveStroke" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stopColor="hsl(var(--muted-foreground))" />
+              <stop offset="100%" stopColor="hsl(var(--primary))" />
+            </linearGradient>
             </defs>
             <rect
               x={highlightStart.x}
@@ -92,22 +91,21 @@ export function MaturityCurve({ score, label, highlightRange = [0.14, 0.43], not
             <text x="5" y="8" className="fill-muted-foreground text-[3px]">
               Competitive Advantage
             </text>
-            <text x="50" y="96" textAnchor="middle" className="fill-muted-foreground text-[3px]">
-              Data + AI Maturity
-            </text>
-          </svg>
-        </div>
-        <div className="mt-4 grid gap-2 text-xs text-muted-foreground">
-          {stages.map((stage, index) => (
-            <div key={stage} className={cn("leading-snug", index === stages.length - 1 && "pt-1")}>
-              <span className="font-medium text-foreground">{index + 1}.</span> {stage}
-            </div>
-          ))}
-        </div>
-        {note && (
-          <p className="mt-4 text-xs text-muted-foreground">{note}</p>
-        )}
+          <text x="50" y="96" textAnchor="middle" className="fill-muted-foreground text-[3px]">
+            Data + AI Maturity
+          </text>
+        </svg>
       </div>
+      <div className="mt-5 grid gap-2 text-xs text-muted-foreground sm:grid-cols-2 sm:gap-x-4">
+        {stages.map((stage, index) => (
+          <div key={stage} className={cn("leading-snug", index === stages.length - 1 && "pt-1")}>
+            <span className="font-medium text-foreground">{index + 1}.</span> {stage}
+          </div>
+        ))}
+      </div>
+      {note && (
+        <p className="mt-4 text-xs text-muted-foreground">{note}</p>
+      )}
     </div>
   );
 }

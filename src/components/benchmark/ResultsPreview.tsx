@@ -162,12 +162,14 @@ export function ResultsPreview({ result, userName, industry, industryLabel }: Re
         <MarketPosition percentile={result.marketPosition} industry={industryLabel} />
       </div>
 
-      <div className="mb-10">
+      <div className="mb-10 grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.5fr)] lg:items-start">
         <MaturityCurve score={mappedScore} label="Your organization" note={note} />
-        <div className="mt-4 space-y-1 text-sm text-muted-foreground">
-          {interpretation.map((line) => (
-            <p key={line}>{line}</p>
-          ))}
+        <div className="rounded-2xl border border-border/60 bg-card/60 p-6">
+          <div className="space-y-2 text-sm text-muted-foreground">
+            {interpretation.map((line) => (
+              <p key={line}>{line}</p>
+            ))}
+          </div>
         </div>
       </div>
 
