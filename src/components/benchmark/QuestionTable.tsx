@@ -1,4 +1,5 @@
 import { Domain } from "@/data/questions";
+import { cn } from "@/lib/utils";
 
 type AnswerValue = number | "unknown";
 
@@ -63,6 +64,7 @@ export function QuestionTable({ domain, answersById, onAnswer }: QuestionTablePr
                         key={option.label}
                         htmlFor={`${inputName}-${option.label}`}
                         className="flex h-full w-full cursor-pointer items-center justify-center"
+                        onClick={() => onAnswer(question.id, option.value)}
                       >
                         <input
                           type="radio"
@@ -74,9 +76,14 @@ export function QuestionTable({ domain, answersById, onAnswer }: QuestionTablePr
                           aria-label={`${question.text} - ${option.label}`}
                           className="sr-only peer"
                         />
-                        <span className="flex h-10 w-10 items-center justify-center rounded-md border border-border text-xs font-semibold text-muted-foreground transition-colors peer-checked:border-primary peer-checked:bg-primary peer-checked:text-primary-foreground">
-                          {option.label}
-                        </span>
+                        <span
+                          className={cn(
+                            "flex h-10 w-10 items-center justify-center rounded-md border transition-colors",
+                            answersById.get(question.id) === option.value
+                              ? "border-primary bg-primary text-primary-foreground"
+                              : "border-border bg-background text-muted-foreground"
+                          )}
+                        />
                       </label>
                     ))}
                   </div>
@@ -108,6 +115,7 @@ export function QuestionTable({ domain, answersById, onAnswer }: QuestionTablePr
                     key={option.label}
                     htmlFor={`${inputName}-${option.label}`}
                     className="flex flex-1 cursor-pointer items-center justify-center"
+                    onClick={() => onAnswer(question.id, option.value)}
                   >
                     <input
                       type="radio"
@@ -119,9 +127,14 @@ export function QuestionTable({ domain, answersById, onAnswer }: QuestionTablePr
                       aria-label={`${question.text} - ${option.label}`}
                       className="sr-only peer"
                     />
-                    <span className="flex h-12 w-12 items-center justify-center rounded-md border border-border text-sm font-semibold text-muted-foreground transition-colors peer-checked:border-primary peer-checked:bg-primary peer-checked:text-primary-foreground">
-                      {option.label}
-                    </span>
+                    <span
+                      className={cn(
+                        "flex h-12 w-12 items-center justify-center rounded-md border transition-colors",
+                        answersById.get(question.id) === option.value
+                          ? "border-primary bg-primary text-primary-foreground"
+                          : "border-border bg-background text-muted-foreground"
+                      )}
+                    />
                   </label>
                 ))}
               </div>
