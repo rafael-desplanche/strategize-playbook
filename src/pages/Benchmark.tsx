@@ -33,9 +33,7 @@ export default function Benchmark() {
 
   // Flatten all questions for progress tracking
   const allQuestions = useMemo(() => {
-    return domains.flatMap((domain) => 
-      domain.questions.map((q) => ({ ...q, domainIcon: domain.icon }))
-    );
+    return domains.flatMap((domain) => domain.questions);
   }, []);
 
   const currentDomain = domains[currentDomainIndex];
@@ -176,11 +174,12 @@ export default function Benchmark() {
 
             {/* Current domain indicator */}
             <div className="mb-6">
-              <h3 className="text-sm font-medium text-primary">
-                {currentDomain.icon} {currentDomain.name}
-              </h3>
+              <h3 className="text-sm font-medium text-primary">{currentDomain.name}</h3>
               <p className="text-sm text-muted-foreground">
                 {currentDomain.description}
+              </p>
+              <p className="text-xs font-semibold text-muted-foreground mt-2">
+                {currentDomain.questions.length} questions
               </p>
             </div>
 
