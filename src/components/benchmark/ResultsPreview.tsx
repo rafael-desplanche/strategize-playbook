@@ -1,44 +1,143 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { BenchmarkResult, getMaturityLabel, getRecommendedCTA } from "@/lib/scoring";
+import { BenchmarkResult, getMaturityLabel } from "@/lib/scoring";
 import { ScoreGauge } from "./ScoreGauge";
 import { MarketPosition } from "./MarketPosition";
 import { BadgeDisplay } from "./BadgeDisplay";
 import { WorkshopModal } from "./WorkshopModal";
-import { Lock, ArrowRight, TrendingUp, AlertTriangle, Calendar, MessageSquare } from "lucide-react";
+import { MaturityCurve } from "./MaturityCurve";
+import { TrendingUp, AlertTriangle, Calendar, MessageSquare } from "lucide-react";
+import html2canvas from "html2canvas";
+import { jsPDF } from "jspdf";
 
 interface ResultsPreviewProps {
   result: BenchmarkResult;
   userName: string;
   industry: string;
   industryLabel: string;
-  onUnlock: () => void;
 }
 
-export function ResultsPreview({ result, userName, industry, industryLabel, onUnlock }: ResultsPreviewProps) {
-  const cta = getRecommendedCTA(result.maturityLevel);
+export function ResultsPreview({ result, userName, industry, industryLabel }: ResultsPreviewProps) {
   const [workshopOpen, setWorkshopOpen] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
+  const reportRef = useRef<HTMLDivElement | null>(null);
+  const industryStatusCopy = {
+    below: "En dessous du benchmark sectoriel",
+    aligned: "Aligné avec le benchmark sectoriel",
+    above: "Au-dessus du benchmark sectoriel",
+  } as const;
+  const domainScoreMap = new Map(result.domainScores.map((domain) => [domain.domainId, domain]));
+  const getDomainAverage = (domainId: string) => {
+    const domain = domainScoreMap.get(domainId);
+    if (!domain || domain.answeredQuestions === 0) return 0;
+    return Number((domain.score / domain.answeredQuestions).toFixed(1));
+  };
+
+  const governanceScore = getDomainAverage("governance");
+  const dataManagementScore = getDomainAverage("data_management");
+  const cultureScore = getDomainAverage("culture_people");
+  const domainAverages = [
+    getDomainAverage("strategy"),
+    governanceScore,
+    cultureScore,
+    dataManagementScore,
+  ];
+
+  const isUnbalanced = Math.max(...domainAverages) - Math.min(...domainAverages) >= 1;
+  const advancedAllowed = governanceScore > 3.5 && dataManagementScore > 3.5 && cultureScore > 3.5;
+  let mappedScore = result.globalScore;
+  let note: string | undefined;
+
+  if (!advancedAllowed && mappedScore > 4.2) {
+    mappedScore = 4.2;
+    note = "Maturity is uneven across governance, data management, and people capabilities. The position is adjusted accordingly.";
+  } else if (isUnbalanced) {
+    mappedScore = Math.max(1, mappedScore - 0.2);
+    note = "Uneven maturity across domains may slow down overall competitive advantage.";
+  }
+
+  const getStageLabel = (score: number) => {
+    if (score <= 1.8) return "Excel / Basic BI";
+    if (score <= 2.5) return "Business Intelligence";
+    if (score <= 3.0) return "Data Warehousing";
+    if (score <= 3.5) return "Data Science";
+    if (score <= 4.2) return "Machine Learning";
+    if (score <= 4.7) return "Full AI transformation";
+    return "Generative AI & advanced use cases";
+  };
+
+  const getNextStage = (score: number) => {
+    if (score <= 1.8) return "Business Intelligence";
+    if (score <= 2.5) return "Data Warehousing";
+    if (score <= 3.0) return "Data Science";
+    if (score <= 3.5) return "Machine Learning";
+    if (score <= 4.2) return "Full AI transformation";
+    if (score <= 4.7) return "Generative AI & advanced use cases";
+    return "Advanced AI use cases";
+  };
+
+  const currentStage = getStageLabel(mappedScore);
+  const nextStage = getNextStage(mappedScore);
+  const interpretation = [
+    `Current maturity: ${currentStage}.`,
+    "This level enables repeatable analytics and targeted AI use cases that improve decision speed and reliability.",
+    `Next focus: move toward ${nextStage} by tightening governance, platform scalability, and skills adoption.`,
+  ];
+
+  const handleExportPdf = async () => {
+    if (!reportRef.current || isExporting) return;
+    setIsExporting(true);
+    const canvas = await html2canvas(reportRef.current, {
+      scale: 2,
+      useCORS: true,
+      backgroundColor: null,
+    });
+    const imgData = canvas.toDataURL("image/png");
+    const pdf = new jsPDF("p", "mm", "a4");
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+    const imgWidth = pageWidth;
+    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+    let position = 0;
+
+    pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+
+    while (imgHeight + position > pageHeight) {
+      position -= pageHeight;
+      pdf.addPage();
+      pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+    }
+
+    pdf.save("baybridgedigital-report.pdf");
+    setIsExporting(false);
+  };
 
   return (
     <div className="animate-fade-up">
-      {/* Header */}
-      <div className="text-center mb-10">
-        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-4">
-          <TrendingUp className="w-4 h-4" />
-          Benchmark complété
-        </div>
-        {userName && (
-          <p className="text-sm font-medium text-muted-foreground mb-2">
-            Bravo {userName},
-          </p>
-        )}
-        <h1 className="text-3xl sm:text-4xl font-display font-bold text-foreground mb-3">
-          Votre score de maturité Data & IA
-        </h1>
-        <p className="text-muted-foreground max-w-lg mx-auto">
-          Découvrez comment vous vous positionnez par rapport aux leaders de votre secteur
-        </p>
+      <div className="flex justify-end mb-4">
+        <Button onClick={handleExportPdf} disabled={isExporting}>
+          Exporter en PDF
+        </Button>
       </div>
+      <div ref={reportRef}>
+        {/* Header */}
+        <div className="text-center mb-10">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-4">
+            <TrendingUp className="w-4 h-4" />
+            Benchmark complété
+          </div>
+          {userName && (
+            <p className="text-sm font-medium text-muted-foreground mb-2">
+              Bravo {userName},
+            </p>
+          )}
+          <h1 className="text-3xl sm:text-4xl font-display font-bold text-foreground mb-3">
+            Votre score de maturité Data & IA
+          </h1>
+          <p className="text-muted-foreground max-w-lg mx-auto">
+            Découvrez comment vous vous positionnez par rapport aux leaders de votre secteur
+          </p>
+        </div>
 
       {/* Main score */}
       <div className="flex flex-col items-center mb-10">
@@ -61,6 +160,40 @@ export function ResultsPreview({ result, userName, industry, industryLabel, onUn
       {/* Market position */}
       <div className="mb-10">
         <MarketPosition percentile={result.marketPosition} industry={industryLabel} />
+      </div>
+
+      <div className="mb-10 grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.5fr)] lg:items-start">
+        <MaturityCurve score={mappedScore} label="Your organization" note={note} />
+        <div className="rounded-2xl border border-border/60 bg-card/60 p-6">
+          <div className="space-y-2 text-sm text-muted-foreground">
+            {interpretation.map((line) => (
+              <p key={line}>{line}</p>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div className="mb-10 rounded-2xl border border-border/60 bg-card/60 p-6">
+        <h3 className="text-lg font-display font-semibold text-foreground mb-2">Benchmark industrie</h3>
+        <p className="text-sm text-muted-foreground mb-4">
+          Industrie de référence : <span className="text-foreground font-medium">{industryLabel}</span>
+        </p>
+        <div className="grid gap-4 sm:grid-cols-3">
+          <div className="rounded-xl border border-border/60 bg-background/60 p-4">
+            <p className="text-xs text-muted-foreground mb-1">High Achievers (industrie)</p>
+            <p className="text-2xl font-semibold text-foreground">{result.highAchieverRate}%</p>
+          </div>
+          <div className="rounded-xl border border-border/60 bg-background/60 p-4">
+            <p className="text-xs text-muted-foreground mb-1">Votre position</p>
+            <p className="text-2xl font-semibold text-foreground">
+              {industryStatusCopy[result.highAchieverStatus]}
+            </p>
+          </div>
+          <div className="rounded-xl border border-border/60 bg-background/60 p-4">
+            <p className="text-xs text-muted-foreground mb-1">Score global (toutes réponses)</p>
+            <p className="text-2xl font-semibold text-foreground">{result.globalScore}</p>
+          </div>
+        </div>
       </div>
 
       {/* Key insight (free) */}
@@ -125,68 +258,7 @@ export function ResultsPreview({ result, userName, industry, industryLabel, onUn
           </div>
         </div>
       </div>
-
-      {/* Locked content teaser */}
-      <div className="relative glass rounded-2xl p-6 mb-10 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-card/95" />
-        <div className="relative z-10">
-          <div className="flex items-center gap-2 text-muted-foreground mb-4">
-            <Lock className="w-4 h-4" />
-            <span className="text-sm">Contenu premium</span>
-          </div>
-          <div className="space-y-3 blur-sm">
-            <div className="h-4 bg-muted/50 rounded w-3/4" />
-            <div className="h-4 bg-muted/50 rounded w-full" />
-            <div className="h-4 bg-muted/50 rounded w-2/3" />
-            <div className="h-32 bg-muted/50 rounded mt-4" />
-          </div>
-        </div>
-        <div className="absolute inset-0 flex items-center justify-center z-20">
-          <div className="text-center">
-            <Lock className="w-12 h-12 text-primary mx-auto mb-4" />
-            <p className="text-foreground font-medium mb-2">
-              Débloquez l'analyse complète
-            </p>
-            <ul className="text-sm text-muted-foreground space-y-1">
-              <li>✓ Radar détaillé par domaine</li>
-              <li>✓ Benchmarks sectoriels complets</li>
-              <li>✓ Recommandations personnalisées</li>
-              <li>✓ Roadmap indicative</li>
-            </ul>
-          </div>
-        </div>
       </div>
-
-      {/* CTA */}
-      <div className="glass rounded-2xl p-6 text-center">
-        <h3 className="text-xl font-display font-bold text-foreground mb-2">
-          {cta.title}
-        </h3>
-        <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-          {cta.description}
-        </p>
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-          <Button
-            onClick={onUnlock}
-            className="btn-primary text-primary-foreground font-semibold px-8 py-6 text-lg"
-          >
-            Débloquer les insights complets
-            <ArrowRight className="ml-2 w-5 h-5" />
-          </Button>
-          <Button
-            variant="outline"
-            onClick={() => setWorkshopOpen(true)}
-            className="border-border hover:bg-muted"
-          >
-            <Calendar className="w-4 h-4 mr-2" />
-            Workshop exécutif
-          </Button>
-        </div>
-        <p className="text-xs text-muted-foreground mt-4">
-          Paiement sécurisé • Accès immédiat
-        </p>
-      </div>
-
       <WorkshopModal 
         open={workshopOpen} 
         onOpenChange={setWorkshopOpen} 
