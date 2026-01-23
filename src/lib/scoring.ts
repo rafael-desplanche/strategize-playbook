@@ -32,7 +32,7 @@ export interface Badge {
 
 export interface Answer {
   questionId: string;
-  value: number | "unknown" | "not_applicable";
+  value: number;
 }
 
 // Market benchmark data by industry (simulated)
@@ -66,10 +66,8 @@ export function calculateScores(answers: Answer[], industry: string): BenchmarkR
     let answeredInDomain = 0;
     
     for (const answer of domainAnswers) {
-      if (typeof answer.value === "number") {
-        domainScore += answer.value;
-        answeredInDomain++;
-      }
+      domainScore += answer.value;
+      answeredInDomain++;
     }
     
     const maxScore = domain.questions.length * 5;
@@ -245,26 +243,4 @@ export function getMaturityLabel(level: number): string {
     5: "Optimisé",
   };
   return labels[level] || "Non défini";
-}
-
-export function getRecommendedCTA(maturityLevel: number): { title: string; description: string; action: string } {
-  if (maturityLevel <= 2) {
-    return {
-      title: "Data Quality & Risk Assessment",
-      description: "Évaluez et sécurisez vos fondations data avant d'accélérer",
-      action: "Planifier un diagnostic",
-    };
-  } else if (maturityLevel === 3) {
-    return {
-      title: "Roadmap Data & IA",
-      description: "Construisez votre feuille de route vers l'excellence data",
-      action: "Définir ma roadmap",
-    };
-  } else {
-    return {
-      title: "Industrialisation sur Databricks",
-      description: "Passez à l'échelle avec la plateforme leader du marché",
-      action: "Découvrir Databricks",
-    };
-  }
 }
