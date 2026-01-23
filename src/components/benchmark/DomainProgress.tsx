@@ -26,8 +26,10 @@ export function DomainProgress({ currentDomainIndex, completedDomains }: DomainP
               }
             )}
           >
-            <span className="text-lg">{domain.icon}</span>
             <span className="text-sm font-medium hidden sm:inline">{domain.name}</span>
+            <span className="text-xs font-semibold rounded-full bg-background/70 px-2 py-0.5 border border-border/60">
+              {domain.questions.length}
+            </span>
             {(isCompleted || isPast) && (
               <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />

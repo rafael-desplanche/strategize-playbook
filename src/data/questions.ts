@@ -5,11 +5,8 @@
 export interface Question {
   id: string;
   domain: string;
+  label: string; // Angle / dimension évaluée
   text: string;
-  options: {
-    value: number;
-    label: string;
-  }[];
 }
 
 export interface Domain {
@@ -35,50 +32,109 @@ export const domains: Domain[] = [
       {
         id: "str-1",
         domain: "strategy",
+        label: "Data & AI vision",
         text: "La Data et l’IA occupent une place claire et explicite dans la vision stratégique de l’entreprise.",
-        options: [
-          { value: 1, label: "Non, la Data et l’IA ne font pas partie de notre vision stratégique." },
-          { value: 2, label: "Elles sont évoquées ponctuellement mais ne sont pas à l’ordre du jour." },
-          { value: 3, label: "Nous avons une vision générale, mais encore peu formalisée et partagée." },
-          { value: 4, label: "Oui, nous avons une vision claire, formalisée et partagée au niveau exécutif." },
-          { value: 5, label: "Oui, la Data et l’IA sont des piliers structurants de notre vision business." },
-        ],
       },
       {
         id: "str-2",
         domain: "strategy",
+        label: "Business alignment",
         text: "Notre stratégie Data & AI est directement alignée avec nos objectifs business prioritaires.",
-        options: [
-          { value: 1, label: "Non, nous ne comprenons pas comment les lier." },
-          { value: 2, label: "Nous avons du mal à définir des cas d’usage business clairs." },
-          { value: 3, label: "Certains objectifs business sont adressés, de manière partielle." },
-          { value: 4, label: "La majorité des initiatives Data & AI soutiennent des objectifs business précis." },
-          { value: 5, label: "Chaque initiative Data & AI est explicitement reliée à un objectif business mesurable." },
-        ],
       },
       {
         id: "str-3",
         domain: "strategy",
+        label: "Executive sponsorship & leadership",
         text: "Les initiatives Data & AI sont portées et soutenues au niveau exécutif.",
-        options: [
-          { value: 1, label: "Non, il n’y a pas de soutien au niveau exécutif." },
-          { value: 2, label: "Le sujet est porté principalement par les équipes Data & AI." },
-          { value: 3, label: "Certains dirigeants soutiennent ces initiatives." },
-          { value: 4, label: "Le soutien exécutif est clair et visible." },
-          { value: 5, label: "La Data et l’IA sont activement promues à tous les niveaux de direction." },
-        ],
       },
       {
         id: "str-4",
         domain: "strategy",
+        label: "Data-driven decision making",
         text: "Les décisions stratégiques et opérationnelles sont éclairées par la donnée.",
-        options: [
-          { value: 1, label: "La majorité de nos décisions ne sont pas guidées par la donnée." },
-          { value: 2, label: "La donnée est utilisée a posteriori pour ajuster." },
-          { value: 3, label: "La donnée est utilisée sur certains sujets clés." },
-          { value: 4, label: "La donnée est centrale dans la majorité des décisions." },
-          { value: 5, label: "Les décisions sont systématiquement augmentées par des insights data fiables." },
-        ],
+      },
+      {
+        id: "str-5",
+        domain: "strategy",
+        label: "Business Impact",
+        text: "Les initiatives Data & AI sont priorisées en fonction de leur impact business attendu.",
+      },
+      {
+        id: "str-6",
+        domain: "strategy",
+        label: "Business Impact",
+        text: "Nous savons concrètement quels sont les impacts du déploiement de la Data et de l’IA sur chaque sujet.",
+      },
+    ],
+  },
+
+  // --------------------------------------------------
+  // DATA MANAGEMENT, TOOLS & ARCHITECTURE
+  // --------------------------------------------------
+  {
+    id: "data_management",
+    name: "Data Management, Tools & Architecture",
+    description: "Plateforme, usages data, analytics et passage à l’échelle",
+    questions: [
+      {
+        id: "dat-1",
+        domain: "data_management",
+        label: "Data-driven operations",
+        text: "La donnée est intégrée dans l’ensemble des décisions, interactions et processus métiers.",
+      },
+      {
+        id: "dat-2",
+        domain: "data_management",
+        label: "Real-time data processing",
+        text: "La donnée est traitée et exploitée en temps réel ou quasi temps réel lorsque nécessaire.",
+      },
+      {
+        id: "dat-3",
+        domain: "data_management",
+        label: "Structured & unstructured data integration",
+        text: "L’architecture permet d’exploiter des données structurées et non structurées de façon intégrée.",
+      },
+      {
+        id: "dat-4",
+        domain: "data_management",
+        label: "Data as a product",
+        text: "La donnée est gérée comme un produit, avec des responsables identifiés et des usages clairs.",
+      },
+      {
+        id: "dat-5",
+        domain: "data_management",
+        label: "Secure self-service data access",
+        text: "Les équipes accèdent à la donnée via des mécanismes de self-service sécurisés.",
+      },
+      {
+        id: "dat-6",
+        domain: "data_management",
+        label: "Business, data & IT collaboration",
+        text: "La plateforme data facilite la collaboration entre les équipes métiers, data et IT.",
+      },
+      {
+        id: "dat-7",
+        domain: "data_management",
+        label: "Analytics value creation",
+        text: "Le niveau d’analytics permet de générer de la valeur business mesurable.",
+      },
+      {
+        id: "dat-8",
+        domain: "data_management",
+        label: "Unified & scalable data platform",
+        text: "L’architecture repose sur une plateforme data unifiée et scalable.",
+      },
+      {
+        id: "dat-9",
+        domain: "data_management",
+        label: "Cost-efficient scalability",
+        text: "L’architecture permet de scaler les usages data à coût maîtrisé.",
+      },
+      {
+        id: "dat-10",
+        domain: "data_management",
+        label: "Automated security, quality & resilience",
+        text: "La gestion de la sécurité, de la qualité et de la résilience de la plateforme data est largement automatisée.",
       },
     ],
   },
@@ -89,126 +145,138 @@ export const domains: Domain[] = [
   {
     id: "governance",
     name: "Governance & Risk Management",
-    description: "Confiance, maîtrise des risques et passage à l’échelle",
+    description: "Confiance, conformité et maîtrise des risques",
     questions: [
       {
         id: "gov-1",
         domain: "governance",
+        label: "Ownership & responsibilities",
         text: "Les responsabilités liées à la gouvernance de la donnée et de l’IA sont clairement définies et assumées.",
-        options: [
-          { value: 1, label: "Aucune responsabilité claire n’est définie." },
-          { value: 2, label: "Les responsabilités sont floues ou informelles." },
-          { value: 3, label: "Les rôles sont définis partiellement." },
-          { value: 4, label: "Les responsabilités sont claires et appliquées." },
-          { value: 5, label: "L’ownership est clair et piloté au niveau exécutif." },
-        ],
       },
       {
         id: "gov-2",
         domain: "governance",
+        label: "Compliance & auditability",
         text: "La gouvernance Data & AI permet de répondre efficacement aux exigences réglementaires et d’audit.",
-        options: [
-          { value: 1, label: "La conformité est difficile à démontrer." },
-          { value: 2, label: "La conformité repose sur des efforts manuels importants." },
-          { value: 3, label: "La conformité est assurée sur les périmètres sensibles." },
-          { value: 4, label: "La conformité est intégrée aux processus data." },
-          { value: 5, label: "La conformité est native, continue et audit-ready." },
-        ],
       },
       {
         id: "gov-3",
         domain: "governance",
+        label: "AI risk management",
         text: "Les risques liés à l’usage de l’IA (biais, dérives, usages inappropriés) sont identifiés et maîtrisés.",
-        options: [
-          { value: 1, label: "Ces risques ne sont pas adressés." },
-          { value: 2, label: "Les risques sont connus mais peu encadrés." },
-          { value: 3, label: "Des contrôles existent sur certains cas d’usage." },
-          { value: 4, label: "Les risques sont évalués et suivis." },
-          { value: 5, label: "La gestion des risques IA est systématique et industrialisée." },
-        ],
       },
       {
         id: "gov-4",
         domain: "governance",
+        label: "Governance as business enabler",
         text: "La gouvernance Data & AI est perçue comme un levier de confiance et de performance.",
-        options: [
-          { value: 1, label: "La gouvernance est perçue comme un frein." },
-          { value: 2, label: "Elle est vue comme une contrainte nécessaire." },
-          { value: 3, label: "Elle apporte parfois de la confiance." },
-          { value: 4, label: "Elle facilite le passage à l’échelle." },
-          { value: 5, label: "Elle constitue un avantage compétitif." },
-        ],
+      },
+      {
+        id: "gov-5",
+        domain: "governance",
+        label: "Data & AI governance framework",
+        text: "L’organisation dispose d’un cadre de gouvernance Data & AI formalisé, documenté et partagé.",
+      },
+      {
+        id: "gov-6",
+        domain: "governance",
+        label: "Data access control",
+        text: "L’accès aux données est contrôlé, tracé et aligné avec les besoins métiers et les exigences réglementaires.",
+      },
+      {
+        id: "gov-7",
+        domain: "governance",
+        label: "Data quality management",
+        text: "La qualité des données est pilotée comme un enjeu de performance pour l’entreprise.",
+      },
+      {
+        id: "gov-8",
+        domain: "governance",
+        label: "Data & model lineage",
+        text: "Nous sommes capables de tracer l’origine, les transformations et les usages des données et des modèles.",
+      },
+      {
+        id: "gov-9",
+        domain: "governance",
+        label: "Model lifecycle governance",
+        text: "Les modèles analytiques et d’IA sont gouvernés sur l’ensemble de leur cycle de vie (conception, déploiement, suivi, retrait).",
+      },
+      {
+        id: "gov-10",
+        domain: "governance",
+        label: "Sensitive data protection",
+        text: "La protection des données sensibles et personnelles est intégrée aux usages Data & IA.",
       },
     ],
   },
 
   // --------------------------------------------------
-  // PEOPLE
+  // CULTURE & PEOPLE
   // --------------------------------------------------
   {
-    id: "people",
-    name: "People",
-    description: "Capital humain, compétences et adoption",
+    id: "culture_people",
+    name: "Culture & People",
+    description: "Compétences, adoption, éthique et autonomie",
     questions: [
       {
         id: "peo-1",
         domain: "people",
+        label: "Data literacy",
         text: "Les collaborateurs disposent d’un niveau de data literacy suffisant pour utiliser la donnée et l’IA de manière pertinente.",
-        options: [
-          { value: 1, label: "La majorité des collaborateurs ne sont pas data literate." },
-          { value: 2, label: "La data literacy est limitée à des profils spécialisés." },
-          { value: 3, label: "Les équipes clés sont globalement data literate." },
-          { value: 4, label: "La data literacy est répandue dans la majorité des fonctions." },
-          { value: 5, label: "La data literacy est une compétence de base pour l’ensemble des collaborateurs." },
-        ],
       },
       {
         id: "peo-2",
         domain: "people",
+        label: "Critical thinking & interpretation",
         text: "Les collaborateurs savent interpréter, questionner et challenger les résultats produits par la donnée et l’IA.",
-        options: [
-          { value: 1, label: "Les résultats sont utilisés sans esprit critique." },
-          { value: 2, label: "Les collaborateurs ont des difficultés à interpréter les résultats." },
-          { value: 3, label: "Les résultats sont compris sur les cas simples." },
-          { value: 4, label: "Les collaborateurs savent interpréter et challenger la majorité des résultats." },
-          { value: 5, label: "Les collaborateurs maîtrisent les limites et biais potentiels." },
-        ],
       },
       {
         id: "peo-3",
         domain: "people",
+        label: "Individual responsibility",
         text: "Les collaborateurs comprennent leur responsabilité individuelle dans l’usage de la donnée et de l’IA.",
-        options: [
-          { value: 1, label: "Ils ne se sentent pas responsables." },
-          { value: 2, label: "La responsabilité est perçue comme un sujet IT ou Data." },
-          { value: 3, label: "Certains rôles clés se sentent responsables." },
-          { value: 4, label: "La responsabilité est largement comprise." },
-          { value: 5, label: "Chaque collaborateur se considère comme acteur et garant." },
-        ],
       },
       {
         id: "peo-4",
         domain: "people",
+        label: "Responsible AI usage",
         text: "Les collaborateurs utilisent les outils d’IA dans un cadre clair et maîtrisé.",
-        options: [
-          { value: 1, label: "Les usages sont non encadrés et peu visibles." },
-          { value: 2, label: "Les règles existent mais sont peu connues." },
-          { value: 3, label: "Les usages sont encadrés sur certains périmètres." },
-          { value: 4, label: "Les usages sont clairement définis et compris." },
-          { value: 5, label: "L’IA est utilisée efficacement, de manière responsable." },
-        ],
       },
       {
         id: "peo-5",
         domain: "people",
+        label: "Team autonomy",
         text: "Les équipes sont autonomes pour utiliser la donnée et l’IA dans leur quotidien.",
-        options: [
-          { value: 1, label: "Les équipes dépendent fortement des experts data." },
-          { value: 2, label: "L’autonomie est très limitée." },
-          { value: 3, label: "Certaines équipes sont autonomes." },
-          { value: 4, label: "La majorité des équipes est autonome." },
-          { value: 5, label: "Les équipes sont autonomes et responsables à grande échelle." },
-        ],
+      },
+      {
+        id: "peo-6",
+        domain: "people",
+        label: "Skills alignment with AI usage",
+        text: "Le niveau de compétences des collaborateurs est aligné avec le niveau d’usage réel de l’IA dans l’organisation.",
+      },
+      {
+        id: "peo-7",
+        domain: "people",
+        label: "Data & AI training investment",
+        text: "L’organisation investit de manière structurée et continue dans la formation Data & IA.",
+      },
+      {
+        id: "peo-8",
+        domain: "people",
+        label: "Onboarding & career development",
+        text: "La data et l’IA font partie intégrante de l’onboarding et des parcours de développement professionnel.",
+      },
+      {
+        id: "peo-9",
+        domain: "people",
+        label: "Ethics & AI awareness",
+        text: "Les collaborateurs sont sensibilisés aux risques, aux limites et aux enjeux éthiques liés à l’IA.",
+      },
+      {
+        id: "peo-10",
+        domain: "people",
+        label: "Human capabilities & ambition fit",
+        text: "Le niveau de compétences humaines est cohérent avec les ambitions Data & IA de l’organisation.",
       },
     ],
   },
@@ -244,8 +312,7 @@ export const industries = [
 ];
 
 export const companySizes = [
-  { value: "individuel", label: "1" },
-  { value: "tpe", label: "TME (<10)" },
+  { value: "tpe", label: "TPE (<10)" },
   { value: "pme", label: "PME (50–249)" },
   { value: "eti", label: "ETI (250–4999)" },
   { value: "grande", label: "Grande entreprise (5000+)" },
@@ -257,6 +324,6 @@ export const roles = [
   { value: "cto", label: "CTO" },
   { value: "cmo", label: "CMO" },
   { value: "cdo", label: "Chief Data Officer" },
-  { value: "director", label: "Head of Sales" },
+  { value: "director", label: "Sales Director" },
   { value: "other", label: "Autre" },
 ];
