@@ -32,7 +32,7 @@ export interface Badge {
 
 export interface Answer {
   questionId: string;
-  value: number | "unknown" | "not_applicable";
+  value: number | "unknown";
 }
 
 // Market benchmark data by industry (simulated)
