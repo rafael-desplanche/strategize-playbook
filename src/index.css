@@ -6,66 +6,66 @@
 
 @layer base {
   :root {
-    /* Executive Light Theme — Bleu / Blanc / Vert */
+    /* Brand Palette */
     --background: 0 0% 100%;
-    --foreground: 222 47% 10%;
+    --foreground: 214 88% 20%;
 
     --card: 0 0% 100%;
-    --card-foreground: 222 47% 10%;
+    --card-foreground: 214 88% 18%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222 47% 10%;
+    --popover-foreground: 214 88% 18%;
 
-    /* Primary — #0d61d3 */
-    --primary: 215 88% 44%;
+    /* Primary - Brand Blue */
+    --primary: 214 88% 44%;
     --primary-foreground: 0 0% 100%;
 
-    /* Secondary — #ffffff (surfaces neutres) */
+    /* Secondary - Pure White */
     --secondary: 0 0% 100%;
-    --secondary-foreground: 222 47% 10%;
+    --secondary-foreground: 214 88% 20%;
 
     /* Muted surfaces */
-    --muted: 210 24% 96%;
-    --muted-foreground: 215 18% 40%;
+    --muted: 214 60% 97%;
+    --muted-foreground: 214 40% 40%;
 
-    /* Accent — réservé aux petits éléments (vert #7eda9d) */
-    --accent: 140 55% 67%;
-    --accent-foreground: 222 47% 10%;
+    /* Accent - Brand Blue tint */
+    --accent: 214 88% 52%;
+    --accent-foreground: 0 0% 100%;
 
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 215 20% 90%;
-    --input: 215 20% 90%;
-    --ring: 215 88% 44%;
+    --border: 214 40% 90%;
+    --input: 214 40% 94%;
+    --ring: 214 88% 44%;
 
     --radius: 0.75rem;
 
     /* Custom tokens */
     --success: 140 55% 67%;
-    --warning: 38 92% 50%;
+    --warning: 214 88% 44%;
     --danger: 0 72% 51%;
     
     /* Gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(215 88% 44%) 0%, hsl(205 92% 52%) 100%);
-    --gradient-accent: linear-gradient(135deg, hsl(140 55% 67%) 0%, hsl(140 55% 58%) 100%);
-    --gradient-surface: linear-gradient(180deg, hsl(0 0% 100%) 0%, hsl(210 24% 98%) 100%);
-    --gradient-glow: radial-gradient(ellipse at center, hsl(215 88% 44% / 0.10) 0%, transparent 70%);
+    --gradient-primary: linear-gradient(135deg, hsl(214 88% 44%) 0%, hsl(214 88% 60%) 100%);
+    --gradient-accent: linear-gradient(135deg, hsl(214 88% 44%) 0%, hsl(214 88% 52%) 100%);
+    --gradient-surface: linear-gradient(180deg, hsl(0 0% 100%) 0%, hsl(214 60% 98%) 100%);
+    --gradient-glow: radial-gradient(ellipse at center, hsl(214 88% 44% / 0.12) 0%, transparent 70%);
     
     /* Shadows */
-    --shadow-glow: 0 0 60px hsl(215 88% 44% / 0.18);
-    --shadow-card: 0 6px 26px hsl(222 47% 10% / 0.08);
-    --shadow-elevated: 0 10px 36px hsl(222 47% 10% / 0.12);
+    --shadow-glow: 0 0 60px hsl(214 88% 44% / 0.2);
+    --shadow-card: 0 6px 24px hsl(214 50% 20% / 0.08);
+    --shadow-elevated: 0 10px 32px hsl(214 50% 20% / 0.12);
 
     /* Sidebar defaults */
     --sidebar-background: 0 0% 100%;
-    --sidebar-foreground: 222 47% 10%;
-    --sidebar-primary: 215 88% 44%;
+    --sidebar-foreground: 214 88% 20%;
+    --sidebar-primary: 214 88% 44%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 210 24% 96%;
-    --sidebar-accent-foreground: 222 47% 10%;
-    --sidebar-border: 215 20% 90%;
-    --sidebar-ring: 215 88% 44%;
+    --sidebar-accent: 214 60% 96%;
+    --sidebar-accent-foreground: 214 88% 20%;
+    --sidebar-border: 214 40% 90%;
+    --sidebar-ring: 214 88% 44%;
   }
 
   .dark {
@@ -145,7 +145,7 @@
   
   .card-interactive:hover {
     @apply border-primary/50 scale-[1.02];
-    box-shadow: 0 0 30px hsl(168 100% 42% / 0.1);
+    box-shadow: 0 0 30px hsl(214 88% 44% / 0.12);
   }
   
   /* Badge styles */

@@ -15,6 +15,8 @@ import { toast } from "sonner";
 type Step = "capture" | "onboarding" | "questions" | "results";
 
 interface UserData {
+  firstName: string;
+  lastName: string;
   email: string;
   phone: string;
   industry: string;
@@ -48,7 +50,7 @@ export default function Benchmark() {
       .map((d) => d.id);
   }, [currentDomainIndex]);
 
-  const handleLeadCapture = (data: { email: string; phone: string }) => {
+  const handleLeadCapture = (data: { firstName: string; lastName: string; email: string; phone: string }) => {
     setUserData((prev) => ({ ...prev, ...data }));
     setStep("onboarding");
   };
@@ -216,6 +218,11 @@ export default function Benchmark() {
         {step === "results" && result && (
           <ResultsPreview
             result={result}
+            userName={
+              userData.firstName && userData.lastName
+                ? `${userData.firstName} ${userData.lastName}`
+                : userData.firstName || userData.lastName || ""
+            }
             industry={userData.industry || ""}
             industryLabel={industryLabel}
             onUnlock={handleUnlock}
