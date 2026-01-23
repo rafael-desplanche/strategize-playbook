@@ -121,7 +121,7 @@ export default function Benchmark() {
               <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
                 <BarChart3 className="w-4 h-4 text-primary" />
               </div>
-              <span className="font-display font-bold text-foreground">DataPulse</span>
+              <span className="font-display font-bold text-foreground">BayBridgeDigital</span>
             </button>
             
             <div className="flex items-center gap-3">

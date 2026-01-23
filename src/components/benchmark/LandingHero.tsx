@@ -26,7 +26,7 @@ export function LandingHero({ onStart }: LandingHeroProps) {
               <BarChart3 className="w-5 h-5 text-primary" />
             </div>
             <span className="font-display font-bold text-xl text-foreground">
-              DataPulse
+              BayBridgeDigital
             </span>
           </div>
           <div className="flex items-center gap-2">
