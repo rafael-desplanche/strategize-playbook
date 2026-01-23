@@ -76,15 +76,15 @@ export default function Benchmark() {
   }, [answersById, currentDomain]);
 
   const result: BenchmarkResult | null = useMemo(() => {
-    if (step === "results" && userData.industry) {
-      return calculateScores(answers, userData.industry);
+    if (step === "results") {
+      return calculateScores(answers, resolvedIndustry);
     }
     return null;
-  }, [step, answers, userData.industry]);
+  }, [step, answers, resolvedIndustry]);
 
   const industryLabel = useMemo(() => {
-    return industries.find((i) => i.value === userData.industry)?.label || userData.industry || "";
-  }, [userData.industry]);
+    return industries.find((i) => i.value === resolvedIndustry)?.label || resolvedIndustry;
+  }, [resolvedIndustry]);
 
 
   const handleBack = () => {
@@ -211,7 +211,7 @@ export default function Benchmark() {
           </div>
         )}
 
-        {step === "results" && result && (
+        {step === "results" && result ? (
           <ResultsPreview
             result={result}
             userName={
@@ -219,10 +219,20 @@ export default function Benchmark() {
                 ? `${userData.firstName} ${userData.lastName}`
                 : userData.firstName || userData.lastName || ""
             }
-            industry={userData.industry || ""}
+            industry={resolvedIndustry}
             industryLabel={industryLabel}
           />
-        )}
+        ) : null}
+        {step === "results" && !result ? (
+          <div className="rounded-2xl border border-border/60 bg-card/60 p-6 text-center">
+            <h2 className="text-xl font-display font-semibold text-foreground mb-2">
+              Résultats indisponibles
+            </h2>
+            <p className="text-sm text-muted-foreground">
+              Nous préparons votre rapport. Merci de réessayer ou de revenir à l’étape précédente.
+            </p>
+          </div>
+        ) : null}
       </main>
     </div>
   );
