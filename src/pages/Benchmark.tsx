@@ -191,10 +191,7 @@ export default function Benchmark() {
               onAnswer={handleAnswer}
             />
 
-            <div className="mt-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-              <p className="text-sm text-muted-foreground">
-                1 = niveau de maturité le plus bas · 5 = niveau le plus élevé
-              </p>
+            <div className="mt-8 flex flex-col sm:flex-row items-start sm:items-center justify-end gap-3">
               <Button
                 onClick={() => {
                   if (!isCurrentDomainComplete) return;
