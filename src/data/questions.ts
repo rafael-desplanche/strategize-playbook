@@ -62,7 +62,7 @@ export const domains: Domain[] = [
   {
     id: "governance",
     name: "Governance & Risk Management",
-    description: "Confiance, maîtrise des risques et passage à l’échelle",
+    description: "Confiance, conformité et maîtrise des risques",
     questions: [
       {
         id: "gov-1",
@@ -92,12 +92,12 @@ export const domains: Domain[] = [
   },
 
   // --------------------------------------------------
-  // PEOPLE
+  // CULTURE & PEOPLE
   // --------------------------------------------------
   {
-    id: "people",
-    name: "People",
-    description: "Capital humain, compétences et adoption",
+    id: "culture_people",
+    name: "Culture & People",
+    description: "Compétences, adoption, éthique et autonomie",
     questions: [
       {
         id: "peo-1",
