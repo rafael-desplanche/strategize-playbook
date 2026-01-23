@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { BenchmarkResult, getMaturityLabel } from "@/lib/scoring";
 import { ScoreGauge } from "./ScoreGauge";
@@ -76,8 +76,14 @@ export function ResultsPreview({ result, userName, industry, industryLabel }: Re
 
   return (
     <div className="animate-fade-up">
-      {/* Header */}
-      <div className="text-center mb-10">
+      <div className="flex justify-end mb-4">
+        <Button onClick={handleExportPdf} disabled={isExporting}>
+          Exporter en PDF
+        </Button>
+      </div>
+      <div ref={reportRef}>
+        {/* Header */}
+        <div className="text-center mb-10">
         <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-4">
           <TrendingUp className="w-4 h-4" />
           Benchmark complété

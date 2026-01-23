@@ -20,6 +20,8 @@ export interface BenchmarkResult {
   badges: Badge[];
   strengths: string[];
   risks: string[];
+  highAchieverRate: number;
+  highAchieverStatus: "below" | "aligned" | "above";
 }
 
 export interface Badge {
@@ -36,17 +38,30 @@ export interface Answer {
 }
 
 // Market benchmark data by industry (simulated)
-const industryBenchmarks: Record<string, { mean: number; p25: number; p50: number; p75: number; p90: number }> = {
-  finance: { mean: 3.2, p25: 2.5, p50: 3.0, p75: 3.8, p90: 4.3 },
-  retail: { mean: 2.8, p25: 2.1, p50: 2.7, p75: 3.4, p90: 4.0 },
-  manufacturing: { mean: 2.5, p25: 1.9, p50: 2.4, p75: 3.1, p90: 3.7 },
-  healthcare: { mean: 2.7, p25: 2.0, p50: 2.6, p75: 3.3, p90: 3.9 },
-  telecom: { mean: 3.0, p25: 2.3, p50: 2.9, p75: 3.6, p90: 4.2 },
-  energy: { mean: 2.6, p25: 2.0, p50: 2.5, p75: 3.2, p90: 3.8 },
-  transport: { mean: 2.4, p25: 1.8, p50: 2.3, p75: 3.0, p90: 3.6 },
-  public: { mean: 2.3, p25: 1.7, p50: 2.2, p75: 2.9, p90: 3.5 },
-  tech: { mean: 3.5, p25: 2.8, p50: 3.4, p75: 4.1, p90: 4.6 },
-  other: { mean: 2.7, p25: 2.0, p50: 2.6, p75: 3.3, p90: 3.9 },
+const industryBenchmarks: Record<
+  string,
+  {
+    mean: number;
+    p25: number;
+    p50: number;
+    p75: number;
+    p90: number;
+    highAchieverRate: number;
+    lowThreshold: number;
+    mediumThreshold: number;
+    highThreshold: number;
+  }
+> = {
+  finance: { mean: 3.2, p25: 2.5, p50: 3.0, p75: 3.8, p90: 4.3, highAchieverRate: 22, lowThreshold: 2.3, mediumThreshold: 3.1, highThreshold: 3.9 },
+  retail: { mean: 2.8, p25: 2.1, p50: 2.7, p75: 3.4, p90: 4.0, highAchieverRate: 14, lowThreshold: 2.0, mediumThreshold: 2.8, highThreshold: 3.5 },
+  manufacturing: { mean: 2.5, p25: 1.9, p50: 2.4, p75: 3.1, p90: 3.7, highAchieverRate: 12, lowThreshold: 1.9, mediumThreshold: 2.6, highThreshold: 3.2 },
+  healthcare: { mean: 2.7, p25: 2.0, p50: 2.6, p75: 3.3, p90: 3.9, highAchieverRate: 16, lowThreshold: 2.1, mediumThreshold: 2.8, highThreshold: 3.4 },
+  telecom: { mean: 3.0, p25: 2.3, p50: 2.9, p75: 3.6, p90: 4.2, highAchieverRate: 20, lowThreshold: 2.4, mediumThreshold: 3.0, highThreshold: 3.7 },
+  energy: { mean: 2.6, p25: 2.0, p50: 2.5, p75: 3.2, p90: 3.8, highAchieverRate: 13, lowThreshold: 2.0, mediumThreshold: 2.7, highThreshold: 3.3 },
+  transport: { mean: 2.4, p25: 1.8, p50: 2.3, p75: 3.0, p90: 3.6, highAchieverRate: 11, lowThreshold: 1.8, mediumThreshold: 2.4, highThreshold: 3.1 },
+  public: { mean: 2.3, p25: 1.7, p50: 2.2, p75: 2.9, p90: 3.5, highAchieverRate: 8, lowThreshold: 1.7, mediumThreshold: 2.3, highThreshold: 3.0 },
+  tech: { mean: 3.5, p25: 2.8, p50: 3.4, p75: 4.1, p90: 4.6, highAchieverRate: 28, lowThreshold: 2.9, mediumThreshold: 3.6, highThreshold: 4.2 },
+  other: { mean: 2.7, p25: 2.0, p50: 2.6, p75: 3.3, p90: 3.9, highAchieverRate: 15, lowThreshold: 2.1, mediumThreshold: 2.8, highThreshold: 3.4 },
 };
 
 export function calculateScores(answers: Answer[], industry: string): BenchmarkResult {
@@ -135,6 +150,20 @@ export function calculateScores(answers: Answer[], industry: string): BenchmarkR
   const strengths = sortedDomains.slice(0, 2).map((d) => d.domainName);
   const risks = sortedDomains.slice(-2).reverse().map((d) => d.domainName);
 
+  const highAchieverScore = Math.max(
+    0,
+    Math.min(
+      100,
+      Math.round((answers.filter((a) => a.value === 5).length / totalQuestions) * 100)
+    )
+  );
+  const highAchieverStatus =
+    highAchieverScore < benchmark.highAchieverRate - 3
+      ? "below"
+      : highAchieverScore > benchmark.highAchieverRate + 3
+      ? "above"
+      : "aligned";
+
   return {
     globalScore,
     globalPercentage,
@@ -145,6 +174,8 @@ export function calculateScores(answers: Answer[], industry: string): BenchmarkR
     badges,
     strengths,
     risks,
+    highAchieverRate: benchmark.highAchieverRate,
+    highAchieverStatus,
   };
 }
 
