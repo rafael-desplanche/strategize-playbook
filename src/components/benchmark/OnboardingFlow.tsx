@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { industries, companySizes, roles } from "@/data/questions";
-import { ArrowRight, Building2, Users, Briefcase } from "lucide-react";
+import { ArrowLeft, ArrowRight, Building2, Users, Briefcase } from "lucide-react";
 
 interface OnboardingData {
   industry: string;
@@ -35,6 +35,14 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
       setStep("role");
     } else if (step === "role" && data.role) {
       onComplete(data);
+    }
+  };
+
+  const handleBack = () => {
+    if (step === "role") {
+      setStep("size");
+    } else if (step === "size") {
+      setStep("industry");
     }
   };
 
@@ -181,7 +189,13 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
       )}
 
       {/* Next button */}
-      <div className="mt-10 flex justify-center">
+      <div className="mt-10 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
+        {step !== "industry" && (
+          <Button variant="outline" onClick={handleBack} className="px-8 py-6 text-lg">
+            <ArrowLeft className="mr-2 w-5 h-5" />
+            Retour
+          </Button>
+        )}
         <Button
           onClick={handleNext}
           disabled={

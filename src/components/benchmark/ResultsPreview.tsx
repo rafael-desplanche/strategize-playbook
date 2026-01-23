@@ -9,12 +9,13 @@ import { Lock, ArrowRight, TrendingUp, AlertTriangle, Calendar, MessageSquare } 
 
 interface ResultsPreviewProps {
   result: BenchmarkResult;
+  userName: string;
   industry: string;
   industryLabel: string;
   onUnlock: () => void;
 }
 
-export function ResultsPreview({ result, industry, industryLabel, onUnlock }: ResultsPreviewProps) {
+export function ResultsPreview({ result, userName, industry, industryLabel, onUnlock }: ResultsPreviewProps) {
   const cta = getRecommendedCTA(result.maturityLevel);
   const [workshopOpen, setWorkshopOpen] = useState(false);
 
@@ -26,6 +27,11 @@ export function ResultsPreview({ result, industry, industryLabel, onUnlock }: Re
           <TrendingUp className="w-4 h-4" />
           Benchmark complété
         </div>
+        {userName && (
+          <p className="text-sm font-medium text-muted-foreground mb-2">
+            Bravo {userName},
+          </p>
+        )}
         <h1 className="text-3xl sm:text-4xl font-display font-bold text-foreground mb-3">
           Votre score de maturité Data & IA
         </h1>

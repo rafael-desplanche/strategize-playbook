@@ -4,16 +4,36 @@ import { Input } from "@/components/ui/input";
 import { ArrowRight, Shield, Zap, BarChart3 } from "lucide-react";
 
 interface LeadCaptureFormProps {
-  onSubmit: (data: { email: string; phone: string }) => void;
+  onSubmit: (data: { firstName: string; lastName: string; email: string; phone: string }) => void;
 }
 
 export function LeadCaptureForm({ onSubmit }: LeadCaptureFormProps) {
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
-  const [errors, setErrors] = useState<{ email?: string; phone?: string }>({});
+  const [errors, setErrors] = useState<{
+    firstName?: string;
+    lastName?: string;
+    email?: string;
+    phone?: string;
+  }>({});
 
   const validate = () => {
-    const newErrors: { email?: string; phone?: string } = {};
+    const newErrors: {
+      firstName?: string;
+      lastName?: string;
+      email?: string;
+      phone?: string;
+    } = {};
+
+    if (!firstName.trim()) {
+      newErrors.firstName = "Prénom requis";
+    }
+
+    if (!lastName.trim()) {
+      newErrors.lastName = "Nom requis";
+    }
     
     if (!email) {
       newErrors.email = "Email requis";
@@ -36,7 +56,7 @@ export function LeadCaptureForm({ onSubmit }: LeadCaptureFormProps) {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (validate()) {
-      onSubmit({ email, phone });
+      onSubmit({ firstName: firstName.trim(), lastName: lastName.trim(), email, phone });
     }
   };
 
@@ -53,6 +73,35 @@ export function LeadCaptureForm({ onSubmit }: LeadCaptureFormProps) {
 
       <form onSubmit={handleSubmit} className="space-y-5 max-w-md mx-auto">
         <div>
+          <label className="mb-2 block text-sm font-medium text-foreground">Prénom</label>
+          <Input
+            type="text"
+            placeholder="Votre prénom"
+            value={firstName}
+            onChange={(e) => setFirstName(e.target.value)}
+            className="h-14 bg-card border-border text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-primary"
+          />
+          {errors.firstName && (
+            <p className="text-destructive text-sm mt-1 animate-fade-up">{errors.firstName}</p>
+          )}
+        </div>
+
+        <div>
+          <label className="mb-2 block text-sm font-medium text-foreground">Nom</label>
+          <Input
+            type="text"
+            placeholder="Votre nom"
+            value={lastName}
+            onChange={(e) => setLastName(e.target.value)}
+            className="h-14 bg-card border-border text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-primary"
+          />
+          {errors.lastName && (
+            <p className="text-destructive text-sm mt-1 animate-fade-up">{errors.lastName}</p>
+          )}
+        </div>
+
+        <div>
+          <label className="mb-2 block text-sm font-medium text-foreground">Email professionnel</label>
           <Input
             type="email"
             placeholder="Email professionnel"
@@ -66,6 +115,7 @@ export function LeadCaptureForm({ onSubmit }: LeadCaptureFormProps) {
         </div>
 
         <div>
+          <label className="mb-2 block text-sm font-medium text-foreground">Téléphone</label>
           <Input
             type="tel"
             placeholder="Téléphone"

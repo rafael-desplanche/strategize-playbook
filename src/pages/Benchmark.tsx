@@ -8,12 +8,15 @@ import { DomainProgress } from "@/components/benchmark/DomainProgress";
 import { ResultsPreview } from "@/components/benchmark/ResultsPreview";
 import { domains, industries } from "@/data/questions";
 import { calculateScores, Answer, BenchmarkResult } from "@/lib/scoring";
-import { BarChart3 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft, BarChart3 } from "lucide-react";
 import { toast } from "sonner";
 
 type Step = "capture" | "onboarding" | "questions" | "results";
 
 interface UserData {
+  firstName: string;
+  lastName: string;
   email: string;
   phone: string;
   industry: string;
@@ -47,7 +50,7 @@ export default function Benchmark() {
       .map((d) => d.id);
   }, [currentDomainIndex]);
 
-  const handleLeadCapture = (data: { email: string; phone: string }) => {
+  const handleLeadCapture = (data: { firstName: string; lastName: string; email: string; phone: string }) => {
     setUserData((prev) => ({ ...prev, ...data }));
     setStep("onboarding");
   };
@@ -94,6 +97,36 @@ export default function Benchmark() {
     });
   };
 
+  const handleBack = () => {
+    if (step === "results") {
+      setStep("questions");
+      return;
+    }
+
+    if (step === "questions") {
+      setAnswers((prev) => prev.slice(0, -1));
+      if (currentQuestionIndex > 0) {
+        setCurrentQuestionIndex((prev) => prev - 1);
+        return;
+      }
+
+      if (currentDomainIndex > 0) {
+        const previousDomainIndex = currentDomainIndex - 1;
+        const previousDomain = domains[previousDomainIndex];
+        setCurrentDomainIndex(previousDomainIndex);
+        setCurrentQuestionIndex(previousDomain.questions.length - 1);
+        return;
+      }
+
+      setStep("onboarding");
+      return;
+    }
+
+    if (step === "onboarding") {
+      setStep("capture");
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -110,14 +143,22 @@ export default function Benchmark() {
               <span className="font-display font-bold text-foreground">DataPulse</span>
             </button>
             
-            {step === "questions" && (
-              <ProgressBar 
-                current={totalAnswered + 1} 
-                total={totalQuestions} 
-                showLabel={false}
-                className="w-32 sm:w-48"
-              />
-            )}
+            <div className="flex items-center gap-3">
+              {step !== "capture" && (
+                <Button variant="outline" size="sm" onClick={handleBack}>
+                  <ArrowLeft className="mr-2 h-4 w-4" />
+                  Retour
+                </Button>
+              )}
+              {step === "questions" && (
+                <ProgressBar 
+                  current={totalAnswered + 1} 
+                  total={totalQuestions} 
+                  showLabel={false}
+                  className="w-32 sm:w-48"
+                />
+              )}
+            </div>
           </div>
         </div>
       </header>
@@ -177,6 +218,11 @@ export default function Benchmark() {
         {step === "results" && result && (
           <ResultsPreview
             result={result}
+            userName={
+              userData.firstName && userData.lastName
+                ? `${userData.firstName} ${userData.lastName}`
+                : userData.firstName || userData.lastName || ""
+            }
             industry={userData.industry || ""}
             industryLabel={industryLabel}
             onUnlock={handleUnlock}
