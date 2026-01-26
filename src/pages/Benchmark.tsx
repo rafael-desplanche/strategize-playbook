@@ -218,6 +218,7 @@ export default function Benchmark() {
                     setCurrentDomainIndex((prev) => prev + 1);
                   } else {
                     setStep("loading");
+                    setStep("results");
                   }
                 }}
                 disabled={!isCurrentDomainComplete}
@@ -257,6 +258,10 @@ export default function Benchmark() {
             </p>
           </div>
         )}
+            industry={resolvedIndustry}
+            industryLabel={industryLabel}
+          />
+        ) : null}
         {step === "results" && !result ? (
           <div className="rounded-2xl border border-border/60 bg-card/60 p-6 text-center">
             <h2 className="text-xl font-display font-semibold text-foreground mb-2">

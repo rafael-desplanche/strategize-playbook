@@ -1,6 +1,9 @@
 import { useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Answer, BenchmarkResult, getMaturityLabel } from "@/lib/scoring";
+import { useRef, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { BenchmarkResult, getMaturityLabel } from "@/lib/scoring";
 import { ScoreGauge } from "./ScoreGauge";
 import { MarketPosition } from "./MarketPosition";
 import { BadgeDisplay } from "./BadgeDisplay";
@@ -31,6 +34,9 @@ export function ResultsPreview({ result, answers, userName, industryLabel }: Res
   const [workshopOpen, setWorkshopOpen] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [activeSection, setActiveSection] = useState<DashboardSection>("overview");
+export function ResultsPreview({ result, userName, industry, industryLabel }: ResultsPreviewProps) {
+  const [workshopOpen, setWorkshopOpen] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
   const reportRef = useRef<HTMLDivElement | null>(null);
   const industryStatusCopy = {
     below: "En dessous du benchmark sectoriel",
@@ -41,6 +47,7 @@ export function ResultsPreview({ result, answers, userName, industryLabel }: Res
     () => new Map(result.domainScores.map((domain) => [domain.domainId, domain])),
     [result.domainScores]
   );
+  const domainScoreMap = new Map(result.domainScores.map((domain) => [domain.domainId, domain]));
   const getDomainAverage = (domainId: string) => {
     const domain = domainScoreMap.get(domainId);
     if (!domain || domain.answeredQuestions === 0) return 0;
@@ -217,6 +224,25 @@ export function ResultsPreview({ result, answers, userName, industryLabel }: Res
                   Overview
                 </button>
               </div>
+      <div ref={reportRef}>
+        {/* Header */}
+        <div className="text-center mb-10">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-4">
+            <TrendingUp className="w-4 h-4" />
+            Benchmark complété
+          </div>
+          {userName && (
+            <p className="text-sm font-medium text-muted-foreground mb-2">
+              Bravo {userName},
+            </p>
+          )}
+          <h1 className="text-3xl sm:text-4xl font-display font-bold text-foreground mb-3">
+            Votre score de maturité Data & IA
+          </h1>
+          <p className="text-muted-foreground max-w-lg mx-auto">
+            Découvrez comment vous vous positionnez par rapport aux leaders de votre secteur
+          </p>
+        </div>
 
               <div className="rounded-xl border border-border/60 bg-background/80 px-3 py-3">
                 <p className="text-xs text-muted-foreground">Positionnement</p>
@@ -260,6 +286,55 @@ export function ResultsPreview({ result, answers, userName, industryLabel }: Res
                   ))}
                 </div>
               </div>
+      {/* Market position */}
+      <div className="mb-10">
+        <MarketPosition percentile={result.marketPosition} industry={industryLabel} />
+      </div>
+
+      <div className="mb-10 grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.5fr)] lg:items-start">
+        <MaturityCurve score={mappedScore} label="Your organization" note={note} />
+        <div className="rounded-2xl border border-border/60 bg-card/60 p-6">
+          <div className="space-y-2 text-sm text-muted-foreground">
+            {interpretation.map((line) => (
+              <p key={line}>{line}</p>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div className="mb-10 rounded-2xl border border-border/60 bg-card/60 p-6">
+        <h3 className="text-lg font-display font-semibold text-foreground mb-2">Benchmark industrie</h3>
+        <p className="text-sm text-muted-foreground mb-4">
+          Industrie de référence : <span className="text-foreground font-medium">{industryLabel}</span>
+        </p>
+        <div className="grid gap-4 sm:grid-cols-3">
+          <div className="rounded-xl border border-border/60 bg-background/60 p-4">
+            <p className="text-xs text-muted-foreground mb-1">High Achievers (industrie)</p>
+            <p className="text-2xl font-semibold text-foreground">{result.highAchieverRate}%</p>
+          </div>
+          <div className="rounded-xl border border-border/60 bg-background/60 p-4">
+            <p className="text-xs text-muted-foreground mb-1">Votre position</p>
+            <p className="text-2xl font-semibold text-foreground">
+              {industryStatusCopy[result.highAchieverStatus]}
+            </p>
+          </div>
+          <div className="rounded-xl border border-border/60 bg-background/60 p-4">
+            <p className="text-xs text-muted-foreground mb-1">Score global (toutes réponses)</p>
+            <p className="text-2xl font-semibold text-foreground">{result.globalScore}</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Key insight (free) */}
+      <div className="glass rounded-2xl p-6 mb-10">
+        <div className="flex items-start gap-4">
+          {result.marketPosition >= 50 ? (
+            <div className="w-12 h-12 rounded-full bg-success/20 flex items-center justify-center flex-shrink-0">
+              <TrendingUp className="w-6 h-6 text-success" />
+            </div>
+          ) : (
+            <div className="w-12 h-12 rounded-full bg-warning/20 flex items-center justify-center flex-shrink-0">
+              <AlertTriangle className="w-6 h-6 text-warning" />
             </div>
           </aside>
 
@@ -507,6 +582,39 @@ export function ResultsPreview({ result, answers, userName, industryLabel }: Res
             )}
           </section>
         </div>
+      {/* Workshop CTA - positioned strategically based on maturity */}
+      <div 
+        onClick={() => setWorkshopOpen(true)}
+        className="glass rounded-2xl p-6 mb-10 cursor-pointer card-interactive border-accent/20"
+      >
+        <div className="flex items-start gap-4">
+          <div className="w-12 h-12 rounded-xl bg-accent/20 flex items-center justify-center flex-shrink-0">
+            <MessageSquare className="w-6 h-6 text-accent" />
+          </div>
+          <div className="flex-1">
+            <h3 className="font-display font-semibold text-foreground mb-1">
+              {result.maturityLevel <= 2 
+                ? "Clarifier vos priorités avec un expert"
+                : result.maturityLevel <= 3
+                ? "Valider votre positionnement"
+                : "Accélérer vers le niveau supérieur"
+              }
+            </h3>
+            <p className="text-sm text-muted-foreground mb-3">
+              {result.maturityLevel <= 2 
+                ? "Un workshop de 90 minutes pour identifier vos quick wins et structurer votre roadmap data."
+                : result.maturityLevel <= 3
+                ? "Challenger vos résultats et définir les actions prioritaires pour progresser."
+                : "Échangez avec nos experts pour transformer votre avance en avantage compétitif durable."
+              }
+            </p>
+            <Button variant="outline" size="sm" className="pointer-events-none">
+              <Calendar className="w-4 h-4 mr-2" />
+              Réserver un créneau
+            </Button>
+          </div>
+        </div>
+      </div>
       </div>
       <WorkshopModal 
         open={workshopOpen} 
