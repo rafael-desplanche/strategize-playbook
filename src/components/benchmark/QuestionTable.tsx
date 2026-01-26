@@ -3,6 +3,13 @@ import { cn } from "@/lib/utils";
 
 type AnswerValue = number;
 
+const scaleOptions: { value: AnswerValue; label: string; description: string }[] = [
+  { value: 0, label: "NSP", description: "Je ne sais pas" },
+  { value: 1, label: "1", description: "Non, pas du tout" },
+  { value: 2, label: "2", description: "Non, très peu" },
+  { value: 3, label: "3", description: "Oui, nous sommes au début" },
+  { value: 4, label: "4", description: "Oui, c’est acquis mais nous pouvons encore nous améliorer" },
+  { value: 5, label: "5", description: "C’est parfaitement acquis" },
 const scaleOptions: { value: AnswerValue; label: string }[] = [
   { value: 0, label: "NSP" },
   { value: 1, label: "1" },
@@ -41,6 +48,7 @@ export function QuestionTable({ domain, answersById, onAnswer }: QuestionTablePr
               <div className="grid grid-cols-[minmax(280px,1fr)_repeat(6,56px)] gap-2 items-center px-4 py-3 bg-muted/40 text-xs font-semibold text-muted-foreground uppercase tracking-wide">
                 <div>Questions</div>
                 {scaleOptions.map((option) => (
+                  <div key={option.label} className="text-center" title={option.description} aria-label={option.description}>
                   <div key={option.label} className="text-center">
                     {option.label}
                   </div>
@@ -64,6 +72,8 @@ export function QuestionTable({ domain, answersById, onAnswer }: QuestionTablePr
                         key={option.label}
                         htmlFor={`${inputName}-${option.label}`}
                         className="flex h-full w-full cursor-pointer items-center justify-center"
+                        title={option.description}
+                        aria-label={option.description}
                         onClick={() => onAnswer(question.id, option.value)}
                       >
                         <input
@@ -110,6 +120,15 @@ export function QuestionTable({ domain, answersById, onAnswer }: QuestionTablePr
                 {question.text}
               </div>
               <div className="mt-4 flex items-center justify-between gap-2">
+                    {scaleOptions.map((option) => (
+                      <label
+                        key={option.label}
+                        htmlFor={`${inputName}-${option.label}`}
+                        className="flex flex-1 cursor-pointer items-center justify-center"
+                        title={option.description}
+                        aria-label={option.description}
+                        onClick={() => onAnswer(question.id, option.value)}
+                      >
                 {scaleOptions.map((option) => (
                   <label
                     key={option.label}

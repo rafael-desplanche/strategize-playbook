@@ -15,6 +15,7 @@ export interface BenchmarkResult {
   globalPercentage: number;
   domainScores: DomainScore[];
   marketPosition: number; // percentile vs market
+  marketAverageScore: number;
   maturityLevel: 1 | 2 | 3 | 4 | 5;
   reliabilityIndex: number; // 0-100 based on answers
   badges: Badge[];
@@ -179,6 +180,7 @@ export function calculateScores(answers: Answer[], industry: string): BenchmarkR
     badges,
     strengths,
     risks,
+    marketAverageScore: benchmark.mean,
     highAchieverRate: benchmark.highAchieverRate,
     highAchieverStatus,
   };

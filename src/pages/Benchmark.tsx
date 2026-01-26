@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { LeadCaptureForm } from "@/components/benchmark/LeadCaptureForm";
 import { OnboardingFlow } from "@/components/benchmark/OnboardingFlow";
@@ -11,7 +11,9 @@ import { calculateScores, Answer, BenchmarkResult } from "@/lib/scoring";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, BarChart3 } from "lucide-react";
 
-type Step = "capture" | "onboarding" | "questions" | "results";
+type Step = "capture" | "onboarding" | "questions" | "loading" | "results";
+
+const RESULTS_LOADING_DELAY_MS = 2000;
 
 interface UserData {
   firstName: string;
@@ -29,6 +31,7 @@ export default function Benchmark() {
   const [userData, setUserData] = useState<Partial<UserData>>({});
   const [answers, setAnswers] = useState<Answer[]>([]);
   const [currentDomainIndex, setCurrentDomainIndex] = useState(0);
+  const loadingTimeoutRef = useRef<number | null>(null);
 
   // Flatten all questions for progress tracking
   const allQuestions = useMemo(() => {
@@ -94,6 +97,11 @@ export default function Benchmark() {
       return;
     }
 
+    if (step === "loading") {
+      setStep("questions");
+      return;
+    }
+
     if (step === "questions") {
       if (currentDomainIndex > 0) {
         setCurrentDomainIndex((prev) => prev - 1);
@@ -108,6 +116,23 @@ export default function Benchmark() {
       setStep("capture");
     }
   };
+
+  useEffect(() => {
+    if (step !== "loading") return;
+    if (loadingTimeoutRef.current) {
+      window.clearTimeout(loadingTimeoutRef.current);
+    }
+    loadingTimeoutRef.current = window.setTimeout(() => {
+      setStep("results");
+    }, RESULTS_LOADING_DELAY_MS);
+
+    return () => {
+      if (loadingTimeoutRef.current) {
+        window.clearTimeout(loadingTimeoutRef.current);
+        loadingTimeoutRef.current = null;
+      }
+    };
+  }, [step]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -126,7 +151,7 @@ export default function Benchmark() {
             </button>
             
             <div className="flex items-center gap-3">
-              {step !== "capture" && (
+              {step !== "capture" && step !== "loading" && (
                 <Button variant="outline" size="sm" onClick={handleBack}>
                   <ArrowLeft className="mr-2 h-4 w-4" />
                   Retour
@@ -192,6 +217,7 @@ export default function Benchmark() {
                   if (currentDomainIndex < domains.length - 1) {
                     setCurrentDomainIndex((prev) => prev + 1);
                   } else {
+                    setStep("loading");
                     setStep("results");
                   }
                 }}
@@ -215,11 +241,23 @@ export default function Benchmark() {
         {step === "results" && result ? (
           <ResultsPreview
             result={result}
+            answers={answers}
             userName={
               userData.firstName && userData.lastName
                 ? `${userData.firstName} ${userData.lastName}`
                 : userData.firstName || userData.lastName || ""
             }
+            industryLabel={industryLabel}
+          />
+        ) : null}
+        {step === "loading" && (
+          <div className="flex flex-col items-center justify-center gap-4 rounded-2xl border border-border/60 bg-card/60 px-6 py-16 text-center">
+            <div className="h-10 w-10 animate-spin rounded-full border-4 border-primary/30 border-t-primary" />
+            <p className="text-sm font-medium text-muted-foreground">
+              Analyse de votre maturité Data & IA en cours…
+            </p>
+          </div>
+        )}
             industry={resolvedIndustry}
             industryLabel={industryLabel}
           />
