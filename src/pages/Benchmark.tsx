@@ -30,6 +30,7 @@ export default function Benchmark() {
   const [step, setStep] = useState<Step>("capture");
   const [userData, setUserData] = useState<Partial<UserData>>({});
   const [answers, setAnswers] = useState<Answer[]>([]);
+  const [result, setResult] = useState<BenchmarkResult | null>(null);
   const [currentDomainIndex, setCurrentDomainIndex] = useState(0);
   const loadingTimeoutRef = useRef<number | null>(null);
 
@@ -79,12 +80,6 @@ export default function Benchmark() {
   }, [answersById, currentDomain]);
 
   const resolvedIndustry = userData.industry || "other";
-  const result: BenchmarkResult | null = useMemo(() => {
-    if (step === "results") {
-      return calculateScores(answers, resolvedIndustry);
-    }
-    return null;
-  }, [step, answers, resolvedIndustry]);
 
   const industryLabel = useMemo(() => {
     return industries.find((i) => i.value === resolvedIndustry)?.label || resolvedIndustry;
@@ -118,7 +113,17 @@ export default function Benchmark() {
   };
 
   useEffect(() => {
-    if (step !== "loading") return;
+    if (step === "loading") {
+      setResult(calculateScores(answers, resolvedIndustry));
+      return;
+    }
+    if (step === "questions") {
+      setResult(null);
+    }
+  }, [step, answers, resolvedIndustry]);
+
+  useEffect(() => {
+    if (step !== "loading" || !result) return;
     if (loadingTimeoutRef.current) {
       window.clearTimeout(loadingTimeoutRef.current);
     }
@@ -132,7 +137,7 @@ export default function Benchmark() {
         loadingTimeoutRef.current = null;
       }
     };
-  }, [step]);
+  }, [step, result]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -218,7 +223,6 @@ export default function Benchmark() {
                     setCurrentDomainIndex((prev) => prev + 1);
                   } else {
                     setStep("loading");
-                    setStep("results");
                   }
                 }}
                 disabled={!isCurrentDomainComplete}
@@ -238,17 +242,28 @@ export default function Benchmark() {
           </div>
         )}
 
-        {step === "results" && result ? (
-          <ResultsPreview
-            result={result}
-            answers={answers}
-            userName={
-              userData.firstName && userData.lastName
-                ? `${userData.firstName} ${userData.lastName}`
-                : userData.firstName || userData.lastName || ""
-            }
-            industryLabel={industryLabel}
-          />
+        {step === "results" ? (
+          result ? (
+            <ResultsPreview
+              result={result}
+              answers={answers}
+              userName={
+                userData.firstName && userData.lastName
+                  ? `${userData.firstName} ${userData.lastName}`
+                  : userData.firstName || userData.lastName || ""
+              }
+              industryLabel={industryLabel}
+            />
+          ) : (
+            <div className="rounded-2xl border border-border/60 bg-card/60 p-6 text-center">
+              <h2 className="text-xl font-display font-semibold text-foreground mb-2">
+                Résultats indisponibles
+              </h2>
+              <p className="text-sm text-muted-foreground">
+                Nous préparons votre rapport. Merci de réessayer ou de revenir à l’étape précédente.
+              </p>
+            </div>
+          )
         ) : null}
         {step === "loading" && (
           <div className="flex flex-col items-center justify-center gap-4 rounded-2xl border border-border/60 bg-card/60 px-6 py-16 text-center">
@@ -258,20 +273,6 @@ export default function Benchmark() {
             </p>
           </div>
         )}
-            industry={resolvedIndustry}
-            industryLabel={industryLabel}
-          />
-        ) : null}
-        {step === "results" && !result ? (
-          <div className="rounded-2xl border border-border/60 bg-card/60 p-6 text-center">
-            <h2 className="text-xl font-display font-semibold text-foreground mb-2">
-              Résultats indisponibles
-            </h2>
-            <p className="text-sm text-muted-foreground">
-              Nous préparons votre rapport. Merci de réessayer ou de revenir à l’étape précédente.
-            </p>
-          </div>
-        ) : null}
       </main>
     </div>
   );

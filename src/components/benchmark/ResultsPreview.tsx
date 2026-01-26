@@ -1,18 +1,22 @@
-import { useMemo, useRef, useState } from "react";
-import { Button } from "@/components/ui/button";
+import { useMemo, useState } from "react";
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Line,
+  LineChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
+import { BadgeDisplay } from "@/components/benchmark/BadgeDisplay";
+import { MarketPosition } from "@/components/benchmark/MarketPosition";
+import { RadarChart } from "@/components/benchmark/RadarChart";
+import { ScoreGauge } from "@/components/benchmark/ScoreGauge";
 import { Answer, BenchmarkResult, getMaturityLabel } from "@/lib/scoring";
-import { useRef, useState } from "react";
-import { Button } from "@/components/ui/button";
-import { BenchmarkResult, getMaturityLabel } from "@/lib/scoring";
-import { ScoreGauge } from "./ScoreGauge";
-import { MarketPosition } from "./MarketPosition";
-import { BadgeDisplay } from "./BadgeDisplay";
-import { WorkshopModal } from "./WorkshopModal";
-import { MaturityCurve } from "./MaturityCurve";
-import { TrendingUp, AlertTriangle, Calendar, MessageSquare } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { domains } from "@/data/questions";
-import html2canvas from "html2canvas";
-import { jsPDF } from "jspdf";
 
 interface ResultsPreviewProps {
   result: BenchmarkResult;
@@ -21,7 +25,20 @@ interface ResultsPreviewProps {
   industryLabel: string;
 }
 
-type DashboardSection = "overview" | string;
+type TabKey = "overview" | string;
+
+const positionBadgeStyles: Record<string, string> = {
+  "High Achiever": "bg-emerald-100 text-emerald-700 border-emerald-200",
+  High: "bg-blue-100 text-blue-700 border-blue-200",
+  Medium: "bg-amber-100 text-amber-700 border-amber-200",
+  Low: "bg-rose-100 text-rose-700 border-rose-200",
+};
+
+const statusCopy = {
+  below: "En dessous du benchmark sectoriel",
+  aligned: "Aligné avec le benchmark sectoriel",
+  above: "Au-dessus du benchmark sectoriel",
+} as const;
 
 const getPositionLabel = (percentage: number) => {
   if (percentage >= 85) return "High Achiever";
@@ -30,85 +47,61 @@ const getPositionLabel = (percentage: number) => {
   return "Low";
 };
 
+const getCategorySummary = (percentage: number) => {
+  if (percentage >= 75) {
+    return {
+      label: "Solide",
+      description: "Les fondamentaux sont solides et les pratiques sont bien industrialisées.",
+      actions: [
+        "Capitaliser sur les initiatives à fort ROI.",
+        "Industrialiser les usages avancés avec des KPI partagés.",
+      ],
+    };
+  }
+  if (percentage >= 50) {
+    return {
+      label: "Intermédiaire",
+      description: "Les bases sont en place mais la cohérence et l’alignement restent perfectibles.",
+      actions: [
+        "Aligner les parties prenantes sur un plan d’exécution commun.",
+        "Formaliser les standards et les rituels de gouvernance.",
+      ],
+    };
+  }
+  return {
+    label: "Critique",
+    description: "Le niveau actuel crée des frictions majeures et freine la performance globale.",
+    actions: [
+      "Prioriser des quick wins pour sécuriser les fondamentaux.",
+      "Mettre en place une feuille de route progressive et mesurable.",
+    ],
+  };
+};
+
 export function ResultsPreview({ result, answers, userName, industryLabel }: ResultsPreviewProps) {
-  const [workshopOpen, setWorkshopOpen] = useState(false);
-  const [isExporting, setIsExporting] = useState(false);
-  const [activeSection, setActiveSection] = useState<DashboardSection>("overview");
-export function ResultsPreview({ result, userName, industry, industryLabel }: ResultsPreviewProps) {
-  const [workshopOpen, setWorkshopOpen] = useState(false);
-  const [isExporting, setIsExporting] = useState(false);
-  const reportRef = useRef<HTMLDivElement | null>(null);
-  const industryStatusCopy = {
-    below: "En dessous du benchmark sectoriel",
-    aligned: "Aligné avec le benchmark sectoriel",
-    above: "Au-dessus du benchmark sectoriel",
-  } as const;
+  const [activeTab, setActiveTab] = useState<TabKey>("overview");
+
+  const answerMap = useMemo(() => new Map(answers.map((answer) => [answer.questionId, answer.value])), [answers]);
   const domainScoreMap = useMemo(
     () => new Map(result.domainScores.map((domain) => [domain.domainId, domain])),
     [result.domainScores]
   );
-  const domainScoreMap = new Map(result.domainScores.map((domain) => [domain.domainId, domain]));
-  const getDomainAverage = (domainId: string) => {
-    const domain = domainScoreMap.get(domainId);
-    if (!domain || domain.answeredQuestions === 0) return 0;
-    return Number((domain.score / domain.answeredQuestions).toFixed(1));
-  };
-
-  const governanceScore = getDomainAverage("governance");
-  const dataManagementScore = getDomainAverage("data_management");
-  const cultureScore = getDomainAverage("culture_people");
-  const domainAverages = [
-    getDomainAverage("strategy"),
-    governanceScore,
-    cultureScore,
-    dataManagementScore,
-  ];
-
-  const isUnbalanced = Math.max(...domainAverages) - Math.min(...domainAverages) >= 1;
-  const advancedAllowed = governanceScore > 3.5 && dataManagementScore > 3.5 && cultureScore > 3.5;
-  let mappedScore = result.globalScore;
-  let note: string | undefined;
-
-  if (!advancedAllowed && mappedScore > 4.2) {
-    mappedScore = 4.2;
-    note = "Maturity is uneven across governance, data management, and people capabilities. The position is adjusted accordingly.";
-  } else if (isUnbalanced) {
-    mappedScore = Math.max(1, mappedScore - 0.2);
-    note = "Uneven maturity across domains may slow down overall competitive advantage.";
-  }
-
-  const getStageLabel = (score: number) => {
-    if (score <= 1.8) return "Excel / Basic BI";
-    if (score <= 2.5) return "Business Intelligence";
-    if (score <= 3.0) return "Data Warehousing";
-    if (score <= 3.5) return "Data Science";
-    if (score <= 4.2) return "Machine Learning";
-    if (score <= 4.7) return "Full AI transformation";
-    return "Generative AI & advanced use cases";
-  };
-
-  const getNextStage = (score: number) => {
-    if (score <= 1.8) return "Business Intelligence";
-    if (score <= 2.5) return "Data Warehousing";
-    if (score <= 3.0) return "Data Science";
-    if (score <= 3.5) return "Machine Learning";
-    if (score <= 4.2) return "Full AI transformation";
-    if (score <= 4.7) return "Generative AI & advanced use cases";
-    return "Advanced AI use cases";
-  };
-
-  const currentStage = getStageLabel(mappedScore);
-  const nextStage = getNextStage(mappedScore);
-  const interpretation = [
-    `Current maturity: ${currentStage}.`,
-    "This level enables repeatable analytics and targeted AI use cases that improve decision speed and reliability.",
-    `Next focus: move toward ${nextStage} by tightening governance, platform scalability, and skills adoption.`,
-  ];
 
   const overviewPositionLabel = getPositionLabel(result.globalPercentage);
-  const stageLabel = getStageLabel(result.globalScore);
+  const maturityLabel = getMaturityLabel(result.maturityLevel);
 
-  const answerMap = useMemo(() => new Map(answers.map((answer) => [answer.questionId, answer.value])), [answers]);
+  const domainScoreData = result.domainScores.map((domain) => ({
+    name: domain.domainName,
+    percentage: domain.percentage,
+    average: domain.totalQuestions > 0 ? Number((domain.score / domain.totalQuestions).toFixed(1)) : 0,
+  }));
+
+  const lineSeries = domainScoreData.map((domain, index) => ({
+    index: index + 1,
+    name: domain.name.split(" ")[0],
+    average: domain.average,
+  }));
+
   const getDomainBreakdown = (domainId: string) => {
     const domain = domains.find((item) => item.id === domainId);
     const counts = { nsp: 0, one: 0, two: 0, three: 0, four: 0, five: 0 };
@@ -141,487 +134,280 @@ export function ResultsPreview({ result, userName, industry, industryLabel }: Re
     return { domain, counts, total: domain.questions.length };
   };
 
-  const activeDomain = activeSection === "overview"
+  const activeDomain = activeTab === "overview"
     ? null
-    : domains.find((domain) => domain.id === activeSection) || null;
+    : domains.find((domain) => domain.id === activeTab) || null;
   const activeDomainScore = activeDomain ? domainScoreMap.get(activeDomain.id) : null;
   const breakdown = activeDomain ? getDomainBreakdown(activeDomain.id) : null;
-  const highRatio = breakdown && breakdown.total > 0
-    ? (breakdown.counts.four + breakdown.counts.five) / breakdown.total
-    : 0;
-  const lowRatio = breakdown && breakdown.total > 0
-    ? (breakdown.counts.one + breakdown.counts.two) / breakdown.total
-    : 0;
-  const nspRatio = breakdown && breakdown.total > 0 ? breakdown.counts.nsp / breakdown.total : 0;
-  const domainPosition = activeDomainScore ? getPositionLabel(activeDomainScore.percentage) : "";
-  const recommendations = activeDomainScore
-    ? activeDomainScore.percentage >= 75
-      ? [
-          "Capitaliser sur les pratiques avancées déjà en place.",
-          "Industrialiser les usages pour générer plus de valeur.",
-        ]
-      : activeDomainScore.percentage >= 50
-      ? [
-          "Structurer les processus clés pour gagner en régularité.",
-          "Renforcer l’alignement entre les équipes et les objectifs.",
-        ]
-      : [
-          "Prioriser les fondamentaux pour sécuriser les usages.",
-          "Mettre en place des rituels de pilotage et de gouvernance.",
-        ]
+  const categorySummary = activeDomainScore ? getCategorySummary(activeDomainScore.percentage) : null;
+  const breakdownData = breakdown
+    ? [
+        { name: "NSP", value: breakdown.counts.nsp },
+        { name: "1", value: breakdown.counts.one },
+        { name: "2", value: breakdown.counts.two },
+        { name: "3", value: breakdown.counts.three },
+        { name: "4", value: breakdown.counts.four },
+        { name: "5", value: breakdown.counts.five },
+      ]
     : [];
 
-  const handleExportPdf = async () => {
-    if (!reportRef.current || isExporting) return;
-    setIsExporting(true);
-    const canvas = await html2canvas(reportRef.current, {
-      scale: 2,
-      useCORS: true,
-      backgroundColor: null,
-    });
-    const imgData = canvas.toDataURL("image/png");
-    const pdf = new jsPDF("p", "mm", "a4");
-    const pageWidth = pdf.internal.pageSize.getWidth();
-    const pageHeight = pdf.internal.pageSize.getHeight();
-    const imgWidth = pageWidth;
-    const imgHeight = (canvas.height * imgWidth) / canvas.width;
-    let position = 0;
-
-    pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
-
-    while (imgHeight + position > pageHeight) {
-      position -= pageHeight;
-      pdf.addPage();
-      pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
-    }
-
-    pdf.save("baybridgedigital-report.pdf");
-    setIsExporting(false);
-  };
-
   return (
-    <div className="animate-fade-up">
-      <div className="flex justify-end mb-4">
-        <Button onClick={handleExportPdf} disabled={isExporting}>
-          Exporter en PDF
-        </Button>
-      </div>
-      <div ref={reportRef} className="rounded-3xl border border-border/60 bg-card/60">
-        <div className="flex flex-col lg:flex-row">
-          <aside className="border-b border-border/60 bg-background/60 px-4 py-6 lg:w-72 lg:border-b-0 lg:border-r">
-            <div className="space-y-4">
-              <div>
-                <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Résultat global</h2>
-                <button
-                  type="button"
-                  onClick={() => setActiveSection("overview")}
-                  className={`mt-3 w-full rounded-xl px-3 py-2 text-left text-sm font-semibold transition ${
-                    activeSection === "overview"
-                      ? "bg-primary/10 text-primary"
-                      : "text-foreground hover:bg-muted/60"
-                  }`}
-                >
-                  Overview
-                </button>
-              </div>
-      <div ref={reportRef}>
-        {/* Header */}
-        <div className="text-center mb-10">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-4">
-            <TrendingUp className="w-4 h-4" />
-            Benchmark complété
-          </div>
-          {userName && (
-            <p className="text-sm font-medium text-muted-foreground mb-2">
-              Bravo {userName},
-            </p>
-          )}
-          <h1 className="text-3xl sm:text-4xl font-display font-bold text-foreground mb-3">
-            Votre score de maturité Data & IA
-          </h1>
-          <p className="text-muted-foreground max-w-lg mx-auto">
-            Découvrez comment vous vous positionnez par rapport aux leaders de votre secteur
-          </p>
-        </div>
-
-              <div className="rounded-xl border border-border/60 bg-background/80 px-3 py-3">
-                <p className="text-xs text-muted-foreground">Positionnement</p>
-                <p className="text-sm font-semibold text-foreground">{overviewPositionLabel}</p>
-                <p className="mt-2 text-xs text-muted-foreground">Étape actuelle</p>
-                <p className="text-sm font-medium text-foreground">{stageLabel}</p>
-              </div>
-
-              <div>
-                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Chronologie</p>
-                <div className="mt-3 space-y-2 text-xs text-muted-foreground">
-                  <div className="flex items-center justify-between">
-                    <span>Progression</span>
-                    <span className="text-foreground font-medium">{result.globalPercentage}%</span>
-                  </div>
-                  <div className="h-2 rounded-full bg-muted/60">
-                    <div
-                      className="h-2 rounded-full bg-primary"
-                      style={{ width: `${result.globalPercentage}%` }}
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div>
-                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Catégories du test</p>
-                <div className="mt-3 space-y-1">
-                  {domains.map((domain) => (
-                    <button
-                      key={domain.id}
-                      type="button"
-                      onClick={() => setActiveSection(domain.id)}
-                      className={`w-full rounded-lg px-3 py-2 text-left text-sm transition ${
-                        activeSection === domain.id
-                          ? "bg-primary/10 text-primary"
-                          : "text-foreground hover:bg-muted/60"
-                      }`}
-                    >
-                      {domain.name}
-                    </button>
-                  ))}
-                </div>
-              </div>
-      {/* Market position */}
-      <div className="mb-10">
-        <MarketPosition percentile={result.marketPosition} industry={industryLabel} />
-      </div>
-
-      <div className="mb-10 grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.5fr)] lg:items-start">
-        <MaturityCurve score={mappedScore} label="Your organization" note={note} />
-        <div className="rounded-2xl border border-border/60 bg-card/60 p-6">
-          <div className="space-y-2 text-sm text-muted-foreground">
-            {interpretation.map((line) => (
-              <p key={line}>{line}</p>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      <div className="mb-10 rounded-2xl border border-border/60 bg-card/60 p-6">
-        <h3 className="text-lg font-display font-semibold text-foreground mb-2">Benchmark industrie</h3>
-        <p className="text-sm text-muted-foreground mb-4">
-          Industrie de référence : <span className="text-foreground font-medium">{industryLabel}</span>
-        </p>
-        <div className="grid gap-4 sm:grid-cols-3">
-          <div className="rounded-xl border border-border/60 bg-background/60 p-4">
-            <p className="text-xs text-muted-foreground mb-1">High Achievers (industrie)</p>
-            <p className="text-2xl font-semibold text-foreground">{result.highAchieverRate}%</p>
-          </div>
-          <div className="rounded-xl border border-border/60 bg-background/60 p-4">
-            <p className="text-xs text-muted-foreground mb-1">Votre position</p>
-            <p className="text-2xl font-semibold text-foreground">
-              {industryStatusCopy[result.highAchieverStatus]}
-            </p>
-          </div>
-          <div className="rounded-xl border border-border/60 bg-background/60 p-4">
-            <p className="text-xs text-muted-foreground mb-1">Score global (toutes réponses)</p>
-            <p className="text-2xl font-semibold text-foreground">{result.globalScore}</p>
-          </div>
-        </div>
-      </div>
-
-      {/* Key insight (free) */}
-      <div className="glass rounded-2xl p-6 mb-10">
-        <div className="flex items-start gap-4">
-          {result.marketPosition >= 50 ? (
-            <div className="w-12 h-12 rounded-full bg-success/20 flex items-center justify-center flex-shrink-0">
-              <TrendingUp className="w-6 h-6 text-success" />
+    <div className="space-y-8">
+      <div className="flex flex-col gap-4 rounded-3xl border border-border/60 bg-card/70 p-6">
+        <div className="flex flex-col gap-2">
+          <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Dashboard résultats</span>
+          <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+            <div>
+              <h1 className="text-3xl font-display font-semibold text-foreground">
+                {userName ? `Bienvenue ${userName}` : "Votre diagnostic Data & IA"}
+              </h1>
+              <p className="text-sm text-muted-foreground">
+                Vue analytique complète de votre maturité et des leviers d’action prioritaires.
+              </p>
             </div>
-          ) : (
-            <div className="w-12 h-12 rounded-full bg-warning/20 flex items-center justify-center flex-shrink-0">
-              <AlertTriangle className="w-6 h-6 text-warning" />
+            <div
+              className={cn(
+                "inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-semibold",
+                positionBadgeStyles[overviewPositionLabel]
+              )}
+            >
+              {overviewPositionLabel}
             </div>
-          </aside>
+          </div>
+        </div>
 
-          <section className="flex-1 px-6 py-8">
-            {activeSection === "overview" && (
-              <div className="space-y-8">
+        <div className="flex flex-wrap gap-2">
+          <button
+            type="button"
+            onClick={() => setActiveTab("overview")}
+            className={cn(
+              "rounded-full px-4 py-2 text-sm font-medium transition",
+              activeTab === "overview"
+                ? "bg-primary text-primary-foreground"
+                : "bg-muted/50 text-muted-foreground hover:bg-muted"
+            )}
+          >
+            Overview
+          </button>
+          {domains.map((domain) => (
+            <button
+              key={domain.id}
+              type="button"
+              onClick={() => setActiveTab(domain.id)}
+              className={cn(
+                "rounded-full px-4 py-2 text-sm font-medium transition",
+                activeTab === domain.id
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-muted/50 text-muted-foreground hover:bg-muted"
+              )}
+            >
+              {domain.name}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {activeTab === "overview" && (
+        <div className="space-y-8">
+          <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+            <div className="rounded-3xl border border-border/60 bg-card/60 p-6">
+              <div className="flex items-center justify-between">
                 <div>
-                  <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-2 text-primary text-sm font-medium">
-                    <TrendingUp className="h-4 w-4" />
-                    Benchmark complété
-                  </div>
-                  {userName && (
-                    <p className="mt-3 text-sm font-medium text-muted-foreground">
-                      Bravo {userName},
+                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Score global</p>
+                  <h2 className="text-2xl font-display font-semibold text-foreground">{result.globalScore}</h2>
+                  <p className="text-sm text-muted-foreground">Maturité {maturityLabel}</p>
+                </div>
+                <ScoreGauge score={result.globalScore} size="lg" />
+              </div>
+              <div className="mt-6 grid gap-4 sm:grid-cols-2">
+                <div className="rounded-2xl border border-border/60 bg-background/80 p-4">
+                  <p className="text-xs text-muted-foreground">Fiabilité des réponses</p>
+                  <p className="text-lg font-semibold text-foreground">{result.reliabilityIndex}%</p>
+                </div>
+                <div className="rounded-2xl border border-border/60 bg-background/80 p-4">
+                  <p className="text-xs text-muted-foreground">Benchmark high achievers</p>
+                  <p className="text-lg font-semibold text-foreground">{result.highAchieverRate}%</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="rounded-3xl border border-border/60 bg-card/60 p-6">
+              <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Positionnement marché</p>
+              <div className="mt-4 space-y-4">
+                <MarketPosition percentile={result.marketPosition} industry={industryLabel} />
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="rounded-2xl border border-border/60 bg-background/80 p-4">
+                    <p className="text-xs text-muted-foreground">Position sectorielle</p>
+                    <p className="text-sm font-semibold text-foreground">
+                      {statusCopy[result.highAchieverStatus]}
                     </p>
-                  )}
-                  <h1 className="mt-2 text-3xl font-display font-bold text-foreground">
-                    Vue d’ensemble de votre maturité Data & IA
-                  </h1>
-                  <p className="mt-2 text-sm text-muted-foreground max-w-2xl">
-                    Résumé synthétique de votre positionnement, forces clés et axes de progression prioritaires.
-                  </p>
-                </div>
-
-                <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.8fr)]">
-                  <div className="rounded-2xl border border-border/60 bg-background/80 p-6">
-                    <div className="flex flex-col items-center">
-                      <ScoreGauge score={result.globalScore} size="lg" />
-                      <div className="mt-4 text-center">
-                        <p className="text-xl font-display font-semibold text-foreground">
-                          Niveau : <span className="gradient-text">{getMaturityLabel(result.maturityLevel)}</span>
-                        </p>
-                        <p className="text-sm text-muted-foreground mt-1">
-                          Indice de fiabilité : {result.reliabilityIndex}%
-                        </p>
-                      </div>
-                    </div>
                   </div>
-                  <div className="rounded-2xl border border-border/60 bg-background/80 p-6">
-                    <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Synthèse rapide</h3>
-                    <div className="mt-4 space-y-3 text-sm text-muted-foreground">
-                      <p>
-                        <span className="font-semibold text-foreground">Forces principales :</span>{" "}
-                        {result.strengths.join(", ")}.
-                      </p>
-                      <p>
-                        <span className="font-semibold text-foreground">Axes prioritaires :</span>{" "}
-                        {result.risks.join(", ")}.
-                      </p>
-                      <p>
-                        <span className="font-semibold text-foreground">Positionnement :</span>{" "}
-                        {industryStatusCopy[result.highAchieverStatus]}.
-                      </p>
-                    </div>
+                  <div className="rounded-2xl border border-border/60 bg-background/80 p-4">
+                    <p className="text-xs text-muted-foreground">Score moyen marché</p>
+                    <p className="text-sm font-semibold text-foreground">{result.marketAverageScore}</p>
                   </div>
                 </div>
+              </div>
+            </div>
+          </div>
 
-                <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.6fr)] lg:items-start">
-                  <MaturityCurve
-                    score={mappedScore}
-                    marketAverageScore={result.marketAverageScore}
-                    label="Your organization"
-                    note={note}
-                  />
-                  <div className="rounded-2xl border border-border/60 bg-background/80 p-6">
-                    <div className="space-y-2 text-sm text-muted-foreground">
-                      {interpretation.map((line) => (
-                        <p key={line}>{line}</p>
-                      ))}
-                    </div>
-                  </div>
+          <div className="grid gap-6 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)]">
+            <div className="rounded-3xl border border-border/60 bg-card/60 p-6">
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-display font-semibold text-foreground">Comparaison des scores</h3>
+                <span className="text-xs text-muted-foreground">Par catégorie</span>
+              </div>
+              <div className="mt-4 h-[260px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={domainScoreData}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                    <XAxis dataKey="name" tick={{ fontSize: 11 }} interval={0} angle={-10} dy={8} />
+                    <YAxis tick={{ fontSize: 11 }} />
+                    <Tooltip
+                      contentStyle={{ background: "hsl(var(--background))", borderRadius: 8 }}
+                      formatter={(value: number) => [`${value}%`, "Score"]}
+                    />
+                    <Bar dataKey="percentage" fill="hsl(var(--primary))" radius={[6, 6, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+
+            <div className="rounded-3xl border border-border/60 bg-card/60 p-6">
+              <h3 className="text-lg font-display font-semibold text-foreground">Équilibre global</h3>
+              <p className="text-sm text-muted-foreground">
+                Radar des catégories pour identifier les écarts de maturité.
+              </p>
+              <RadarChart domainScores={result.domainScores} />
+            </div>
+          </div>
+
+          <div className="grid gap-6 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">
+            <div className="rounded-3xl border border-border/60 bg-card/60 p-6">
+              <h3 className="text-lg font-display font-semibold text-foreground">Progression de maturité</h3>
+              <p className="text-sm text-muted-foreground">Évolution relative par catégorie (score 0-5).</p>
+              <div className="mt-4 h-[220px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={lineSeries}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                    <XAxis dataKey="name" tick={{ fontSize: 11 }} />
+                    <YAxis tick={{ fontSize: 11 }} domain={[0, 5]} />
+                    <Tooltip
+                      contentStyle={{ background: "hsl(var(--background))", borderRadius: 8 }}
+                      formatter={(value: number) => [`${value}`, "Score"]}
+                    />
+                    <Line type="monotone" dataKey="average" stroke="hsl(var(--primary))" strokeWidth={2} />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+
+            <div className="rounded-3xl border border-border/60 bg-card/60 p-6">
+              <h3 className="text-lg font-display font-semibold text-foreground">Synthèse des insights</h3>
+              <div className="mt-4 space-y-4">
+                <div className="rounded-2xl border border-emerald-200/60 bg-emerald-50/60 p-4">
+                  <p className="text-xs font-semibold text-emerald-700">Forces principales</p>
+                  <p className="text-sm text-emerald-900">{result.strengths.join(", ")}</p>
                 </div>
-
-                <div className="rounded-2xl border border-border/60 bg-background/80 p-6">
-                  <h3 className="text-lg font-display font-semibold text-foreground mb-2">Benchmark industrie</h3>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    Industrie de référence : <span className="text-foreground font-medium">{industryLabel}</span>
-                  </p>
-                  <div className="grid gap-4 sm:grid-cols-3">
-                    <div className="rounded-xl border border-border/60 bg-background/60 p-4">
-                      <p className="text-xs text-muted-foreground mb-1">High Achievers (industrie)</p>
-                      <p className="text-2xl font-semibold text-foreground">{result.highAchieverRate}%</p>
-                    </div>
-                    <div className="rounded-xl border border-border/60 bg-background/60 p-4">
-                      <p className="text-xs text-muted-foreground mb-1">Votre position</p>
-                      <p className="text-2xl font-semibold text-foreground">
-                        {industryStatusCopy[result.highAchieverStatus]}
-                      </p>
-                    </div>
-                    <div className="rounded-xl border border-border/60 bg-background/60 p-4">
-                      <p className="text-xs text-muted-foreground mb-1">Score global (toutes réponses)</p>
-                      <p className="text-2xl font-semibold text-foreground">{result.globalScore}</p>
-                    </div>
-                  </div>
+                <div className="rounded-2xl border border-amber-200/60 bg-amber-50/60 p-4">
+                  <p className="text-xs font-semibold text-amber-700">Axes prioritaires</p>
+                  <p className="text-sm text-amber-900">{result.risks.join(", ")}</p>
                 </div>
-
-                <div className="rounded-2xl border border-border/60 bg-background/80 p-6">
-                  <MarketPosition percentile={result.marketPosition} industry={industryLabel} />
-                </div>
-
-                <div className="rounded-2xl border border-border/60 bg-background/80 p-6">
+                <div className="rounded-2xl border border-border/60 bg-background/80 p-4">
+                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Badges</p>
                   <BadgeDisplay badges={result.badges} />
                 </div>
-
-                <div className="glass rounded-2xl p-6">
-                  <div className="flex items-start gap-4">
-                    {result.marketPosition >= 50 ? (
-                      <div className="w-12 h-12 rounded-full bg-success/20 flex items-center justify-center flex-shrink-0">
-                        <TrendingUp className="w-6 h-6 text-success" />
-                      </div>
-                    ) : (
-                      <div className="w-12 h-12 rounded-full bg-warning/20 flex items-center justify-center flex-shrink-0">
-                        <AlertTriangle className="w-6 h-6 text-warning" />
-                      </div>
-                    )}
-                    <div>
-                      <h3 className="font-display font-semibold text-foreground mb-2">
-                        Insight clé
-                      </h3>
-                      <p className="text-muted-foreground">
-                        {result.marketPosition >= 75 ? (
-                          <>Votre maturité data vous place dans le <strong className="text-success">top quartile</strong> de votre secteur. Vos points forts : <strong>{result.strengths.join(", ")}</strong>.</>
-                        ) : result.marketPosition >= 50 ? (
-                          <>Vous êtes au-dessus de la médiane du marché. Accélérez sur <strong className="text-warning">{result.risks[0]}</strong> pour rejoindre les leaders.</>
-                        ) : (
-                          <>Attention : vous êtes en retard sur <strong className="text-destructive">{result.risks.join(" et ")}</strong>. Des actions rapides sont nécessaires.</>
-                        )}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                <div 
-                  onClick={() => setWorkshopOpen(true)}
-                  className="glass rounded-2xl p-6 cursor-pointer card-interactive border-accent/20"
-                >
-                  <div className="flex items-start gap-4">
-                    <div className="w-12 h-12 rounded-xl bg-accent/20 flex items-center justify-center flex-shrink-0">
-                      <MessageSquare className="w-6 h-6 text-accent" />
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="font-display font-semibold text-foreground mb-1">
-                        {result.maturityLevel <= 2 
-                          ? "Clarifier vos priorités avec un expert"
-                          : result.maturityLevel <= 3
-                          ? "Valider votre positionnement"
-                          : "Accélérer vers le niveau supérieur"
-                        }
-                      </h3>
-                      <p className="text-sm text-muted-foreground mb-3">
-                        {result.maturityLevel <= 2 
-                          ? "Un workshop de 90 minutes pour identifier vos quick wins et structurer votre roadmap data."
-                          : result.maturityLevel <= 3
-                          ? "Challenger vos résultats et définir les actions prioritaires pour progresser."
-                          : "Échangez avec nos experts pour transformer votre avance en avantage compétitif durable."
-                        }
-                      </p>
-                      <Button variant="outline" size="sm" className="pointer-events-none">
-                        <Calendar className="w-4 h-4 mr-2" />
-                        Réserver un créneau
-                      </Button>
-                    </div>
-                  </div>
-                </div>
               </div>
-            )}
-
-            {activeDomain && activeDomainScore && breakdown && (
-              <div className="space-y-8">
-                <div>
-                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Analyse par catégorie</p>
-                  <h2 className="mt-2 text-2xl font-display font-bold text-foreground">{activeDomain.name}</h2>
-                  <p className="mt-2 text-sm text-muted-foreground">{activeDomain.description}</p>
-                </div>
-
-                <div className="grid gap-6 lg:grid-cols-3">
-                  <div className="rounded-2xl border border-border/60 bg-background/80 p-6">
-                    <p className="text-xs text-muted-foreground">Score catégorie</p>
-                    <p className="text-3xl font-semibold text-foreground mt-2">{activeDomainScore.score}</p>
-                    <p className="text-sm text-muted-foreground mt-1">{activeDomainScore.percentage}% • {domainPosition}</p>
-                  </div>
-                  <div className="rounded-2xl border border-border/60 bg-background/80 p-6">
-                    <p className="text-xs text-muted-foreground">Réponses hautes (4-5)</p>
-                    <p className="text-3xl font-semibold text-foreground mt-2">
-                      {breakdown.counts.four + breakdown.counts.five}
-                    </p>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      {Math.round(highRatio * 100)}% des réponses
-                    </p>
-                  </div>
-                  <div className="rounded-2xl border border-border/60 bg-background/80 p-6">
-                    <p className="text-xs text-muted-foreground">Réponses NSP</p>
-                    <p className="text-3xl font-semibold text-foreground mt-2">{breakdown.counts.nsp}</p>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      {Math.round(nspRatio * 100)}% des réponses
-                    </p>
-                  </div>
-                </div>
-
-                <div className="rounded-2xl border border-border/60 bg-background/80 p-6">
-                  <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Répartition des réponses</h3>
-                  <div className="mt-4 grid gap-3 sm:grid-cols-3 lg:grid-cols-6">
-                    {[
-                      { label: "NSP", value: breakdown.counts.nsp },
-                      { label: "1", value: breakdown.counts.one },
-                      { label: "2", value: breakdown.counts.two },
-                      { label: "3", value: breakdown.counts.three },
-                      { label: "4", value: breakdown.counts.four },
-                      { label: "5", value: breakdown.counts.five },
-                    ].map((item) => (
-                      <div key={item.label} className="rounded-xl border border-border/60 bg-background/60 p-3 text-center">
-                        <p className="text-xs text-muted-foreground">{item.label}</p>
-                        <p className="text-lg font-semibold text-foreground">{item.value}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="grid gap-6 lg:grid-cols-2">
-                  <div className="rounded-2xl border border-border/60 bg-background/80 p-6">
-                    <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Points forts</h3>
-                    <ul className="mt-3 space-y-2 text-sm text-muted-foreground list-disc list-inside">
-                      <li>{highRatio >= 0.5 ? "Adoption avancée sur une majorité des sujets." : "Quelques fondations solides déjà en place."}</li>
-                      <li>{nspRatio < 0.2 ? "Bonne clarté sur les pratiques existantes." : "Clarté partielle sur certains usages."}</li>
-                    </ul>
-                  </div>
-                  <div className="rounded-2xl border border-border/60 bg-background/80 p-6">
-                    <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Axes d’amélioration</h3>
-                    <ul className="mt-3 space-y-2 text-sm text-muted-foreground list-disc list-inside">
-                      <li>{lowRatio >= 0.4 ? "Prioriser les bas niveaux pour réduire les écarts." : "Renforcer la régularité sur les pratiques intermédiaires."}</li>
-                      <li>{nspRatio >= 0.3 ? "Clarifier les responsabilités et la documentation." : "Formaliser les processus pour stabiliser les acquis."}</li>
-                    </ul>
-                  </div>
-                </div>
-
-                <div className="rounded-2xl border border-border/60 bg-background/80 p-6">
-                  <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Recommandations concrètes</h3>
-                  <ul className="mt-3 space-y-2 text-sm text-muted-foreground list-disc list-inside">
-                    {recommendations.map((item) => (
-                      <li key={item}>{item}</li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-            )}
-          </section>
-        </div>
-      {/* Workshop CTA - positioned strategically based on maturity */}
-      <div 
-        onClick={() => setWorkshopOpen(true)}
-        className="glass rounded-2xl p-6 mb-10 cursor-pointer card-interactive border-accent/20"
-      >
-        <div className="flex items-start gap-4">
-          <div className="w-12 h-12 rounded-xl bg-accent/20 flex items-center justify-center flex-shrink-0">
-            <MessageSquare className="w-6 h-6 text-accent" />
-          </div>
-          <div className="flex-1">
-            <h3 className="font-display font-semibold text-foreground mb-1">
-              {result.maturityLevel <= 2 
-                ? "Clarifier vos priorités avec un expert"
-                : result.maturityLevel <= 3
-                ? "Valider votre positionnement"
-                : "Accélérer vers le niveau supérieur"
-              }
-            </h3>
-            <p className="text-sm text-muted-foreground mb-3">
-              {result.maturityLevel <= 2 
-                ? "Un workshop de 90 minutes pour identifier vos quick wins et structurer votre roadmap data."
-                : result.maturityLevel <= 3
-                ? "Challenger vos résultats et définir les actions prioritaires pour progresser."
-                : "Échangez avec nos experts pour transformer votre avance en avantage compétitif durable."
-              }
-            </p>
-            <Button variant="outline" size="sm" className="pointer-events-none">
-              <Calendar className="w-4 h-4 mr-2" />
-              Réserver un créneau
-            </Button>
+            </div>
           </div>
         </div>
-      </div>
-      </div>
-      <WorkshopModal 
-        open={workshopOpen} 
-        onOpenChange={setWorkshopOpen} 
-        context="results"
-        maturityLevel={result.maturityLevel}
-      />
+      )}
+
+      {activeTab !== "overview" && activeDomain && activeDomainScore && breakdown && categorySummary && (
+        <div className="space-y-8">
+          <div className="grid gap-6 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">
+            <div className="rounded-3xl border border-border/60 bg-card/60 p-6">
+              <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Catégorie</p>
+              <h2 className="text-2xl font-display font-semibold text-foreground">{activeDomain.name}</h2>
+              <p className="text-sm text-muted-foreground">{activeDomain.description}</p>
+              <div className="mt-6 grid gap-4 sm:grid-cols-3">
+                <div className="rounded-2xl border border-border/60 bg-background/80 p-4">
+                  <p className="text-xs text-muted-foreground">Score</p>
+                  <p className="text-lg font-semibold text-foreground">{activeDomainScore.percentage}%</p>
+                </div>
+                <div className="rounded-2xl border border-border/60 bg-background/80 p-4">
+                  <p className="text-xs text-muted-foreground">Réponses analysées</p>
+                  <p className="text-lg font-semibold text-foreground">
+                    {activeDomainScore.answeredQuestions}/{activeDomainScore.totalQuestions}
+                  </p>
+                </div>
+                <div className="rounded-2xl border border-border/60 bg-background/80 p-4">
+                  <p className="text-xs text-muted-foreground">Positionnement</p>
+                  <p className="text-lg font-semibold text-foreground">{categorySummary.label}</p>
+                </div>
+              </div>
+              <div className="mt-6 rounded-2xl border border-border/60 bg-background/80 p-4">
+                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Analyse synthétique</p>
+                <p className="text-sm text-muted-foreground">{categorySummary.description}</p>
+              </div>
+            </div>
+
+            <div className="rounded-3xl border border-border/60 bg-card/60 p-6">
+              <h3 className="text-lg font-display font-semibold text-foreground">Répartition des réponses</h3>
+              <div className="mt-4 h-[240px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={breakdownData}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                    <XAxis dataKey="name" tick={{ fontSize: 11 }} />
+                    <YAxis tick={{ fontSize: 11 }} />
+                    <Tooltip
+                      contentStyle={{ background: "hsl(var(--background))", borderRadius: 8 }}
+                      formatter={(value: number) => [value, "Réponses"]}
+                    />
+                    <Bar dataKey="value" fill="hsl(var(--primary))" radius={[6, 6, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+            <div className="rounded-3xl border border-border/60 bg-card/60 p-6">
+              <h3 className="text-lg font-display font-semibold text-foreground">Insights actionnables</h3>
+              <ul className="mt-4 space-y-3 text-sm text-muted-foreground">
+                {categorySummary.actions.map((action) => (
+                  <li key={action} className="flex items-start gap-2">
+                    <span className="mt-1 h-2 w-2 rounded-full bg-primary" />
+                    <span>{action}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div className="rounded-3xl border border-border/60 bg-card/60 p-6">
+              <h3 className="text-lg font-display font-semibold text-foreground">Focus score</h3>
+              <p className="text-sm text-muted-foreground">
+                Comparaison rapide avec le score global pour identifier les écarts prioritaires.
+              </p>
+              <div className="mt-6 space-y-4">
+                <div className="rounded-2xl border border-border/60 bg-background/80 p-4">
+                  <p className="text-xs text-muted-foreground">Score catégorie</p>
+                  <p className="text-lg font-semibold text-foreground">{activeDomainScore.percentage}%</p>
+                </div>
+                <div className="rounded-2xl border border-border/60 bg-background/80 p-4">
+                  <p className="text-xs text-muted-foreground">Score global</p>
+                  <p className="text-lg font-semibold text-foreground">{result.globalPercentage}%</p>
+                </div>
+                <div className="rounded-2xl border border-border/60 bg-background/80 p-4">
+                  <p className="text-xs text-muted-foreground">Écart</p>
+                  <p className="text-lg font-semibold text-foreground">
+                    {activeDomainScore.percentage - result.globalPercentage} pts
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
