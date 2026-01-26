@@ -139,6 +139,15 @@ export default function Benchmark() {
     };
   }, [step, result]);
 
+  useEffect(() => {
+    if (step === "loading" || step === "results") {
+      setResult(calculateScores(answers, resolvedIndustry));
+    }
+    if (step === "questions") {
+      setResult(null);
+    }
+  }, [step, answers, resolvedIndustry]);
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
