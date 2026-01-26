@@ -238,17 +238,28 @@ export default function Benchmark() {
           </div>
         )}
 
-        {step === "results" && result ? (
-          <ResultsPreview
-            result={result}
-            answers={answers}
-            userName={
-              userData.firstName && userData.lastName
-                ? `${userData.firstName} ${userData.lastName}`
-                : userData.firstName || userData.lastName || ""
-            }
-            industryLabel={industryLabel}
-          />
+        {step === "results" ? (
+          result ? (
+            <ResultsPreview
+              result={result}
+              answers={answers}
+              userName={
+                userData.firstName && userData.lastName
+                  ? `${userData.firstName} ${userData.lastName}`
+                  : userData.firstName || userData.lastName || ""
+              }
+              industryLabel={industryLabel}
+            />
+          ) : (
+            <div className="rounded-2xl border border-border/60 bg-card/60 p-6 text-center">
+              <h2 className="text-xl font-display font-semibold text-foreground mb-2">
+                Résultats indisponibles
+              </h2>
+              <p className="text-sm text-muted-foreground">
+                Nous préparons votre rapport. Merci de réessayer ou de revenir à l’étape précédente.
+              </p>
+            </div>
+          )
         ) : null}
         {step === "loading" && (
           <div className="flex flex-col items-center justify-center gap-4 rounded-2xl border border-border/60 bg-card/60 px-6 py-16 text-center">
@@ -258,20 +269,6 @@ export default function Benchmark() {
             </p>
           </div>
         )}
-            industry={resolvedIndustry}
-            industryLabel={industryLabel}
-          />
-        ) : null}
-        {step === "results" && !result ? (
-          <div className="rounded-2xl border border-border/60 bg-card/60 p-6 text-center">
-            <h2 className="text-xl font-display font-semibold text-foreground mb-2">
-              Résultats indisponibles
-            </h2>
-            <p className="text-sm text-muted-foreground">
-              Nous préparons votre rapport. Merci de réessayer ou de revenir à l’étape précédente.
-            </p>
-          </div>
-        ) : null}
       </main>
     </div>
   );
