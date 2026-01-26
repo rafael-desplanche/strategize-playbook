@@ -30,6 +30,7 @@ export default function Benchmark() {
   const [step, setStep] = useState<Step>("capture");
   const [userData, setUserData] = useState<Partial<UserData>>({});
   const [answers, setAnswers] = useState<Answer[]>([]);
+  const [result, setResult] = useState<BenchmarkResult | null>(null);
   const [currentDomainIndex, setCurrentDomainIndex] = useState(0);
   const loadingTimeoutRef = useRef<number | null>(null);
 
@@ -79,12 +80,6 @@ export default function Benchmark() {
   }, [answersById, currentDomain]);
 
   const resolvedIndustry = userData.industry || "other";
-  const result: BenchmarkResult | null = useMemo(() => {
-    if (step === "results") {
-      return calculateScores(answers, resolvedIndustry);
-    }
-    return null;
-  }, [step, answers, resolvedIndustry]);
 
   const industryLabel = useMemo(() => {
     return industries.find((i) => i.value === resolvedIndustry)?.label || resolvedIndustry;
@@ -133,6 +128,15 @@ export default function Benchmark() {
       }
     };
   }, [step]);
+
+  useEffect(() => {
+    if (step === "loading" || step === "results") {
+      setResult(calculateScores(answers, resolvedIndustry));
+    }
+    if (step === "questions") {
+      setResult(null);
+    }
+  }, [step, answers, resolvedIndustry]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -218,7 +222,6 @@ export default function Benchmark() {
                     setCurrentDomainIndex((prev) => prev + 1);
                   } else {
                     setStep("loading");
-                    setStep("results");
                   }
                 }}
                 disabled={!isCurrentDomainComplete}
