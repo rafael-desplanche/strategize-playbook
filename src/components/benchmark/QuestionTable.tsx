@@ -10,6 +10,13 @@ const scaleOptions: { value: AnswerValue; label: string; description: string }[]
   { value: 3, label: "3", description: "Oui, nous sommes au début" },
   { value: 4, label: "4", description: "Oui, c’est acquis mais nous pouvons encore nous améliorer" },
   { value: 5, label: "5", description: "C’est parfaitement acquis" },
+const scaleOptions: { value: AnswerValue; label: string }[] = [
+  { value: 0, label: "NSP" },
+  { value: 1, label: "1" },
+  { value: 2, label: "2" },
+  { value: 3, label: "3" },
+  { value: 4, label: "4" },
+  { value: 5, label: "5" },
 ];
 
 interface QuestionTableProps {
@@ -42,6 +49,7 @@ export function QuestionTable({ domain, answersById, onAnswer }: QuestionTablePr
                 <div>Questions</div>
                 {scaleOptions.map((option) => (
                   <div key={option.label} className="text-center" title={option.description} aria-label={option.description}>
+                  <div key={option.label} className="text-center">
                     {option.label}
                   </div>
                 ))}
@@ -121,6 +129,13 @@ export function QuestionTable({ domain, answersById, onAnswer }: QuestionTablePr
                         aria-label={option.description}
                         onClick={() => onAnswer(question.id, option.value)}
                       >
+                {scaleOptions.map((option) => (
+                  <label
+                    key={option.label}
+                    htmlFor={`${inputName}-${option.label}`}
+                    className="flex flex-1 cursor-pointer items-center justify-center"
+                    onClick={() => onAnswer(question.id, option.value)}
+                  >
                     <input
                       type="radio"
                       name={inputName}
