@@ -113,7 +113,17 @@ export default function Benchmark() {
   };
 
   useEffect(() => {
-    if (step !== "loading") return;
+    if (step === "loading") {
+      setResult(calculateScores(answers, resolvedIndustry));
+      return;
+    }
+    if (step === "questions") {
+      setResult(null);
+    }
+  }, [step, answers, resolvedIndustry]);
+
+  useEffect(() => {
+    if (step !== "loading" || !result) return;
     if (loadingTimeoutRef.current) {
       window.clearTimeout(loadingTimeoutRef.current);
     }
@@ -127,7 +137,7 @@ export default function Benchmark() {
         loadingTimeoutRef.current = null;
       }
     };
-  }, [step]);
+  }, [step, result]);
 
   useEffect(() => {
     if (step === "loading" || step === "results") {
